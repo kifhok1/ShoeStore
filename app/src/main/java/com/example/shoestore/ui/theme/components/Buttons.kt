@@ -3,14 +3,22 @@
 package com.example.shoestore.ui.theme.components
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -75,6 +83,49 @@ fun MainButton(modifier: Modifier = Modifier,
 //        }
 //    }
 //}
+
+@Composable
+fun IconButtonBack(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    IconButton(
+        onClick = onClick,
+        modifier = modifier
+            .size(44.dp)
+            .background(CustomTheme.colors.background, shape = CircleShape)
+    ) {
+        Icon(
+            painter = painterResource(id = R.drawable.back),
+            contentDescription = null,
+            tint = CustomTheme.colors.text,
+            modifier = Modifier.size(24.dp)
+        )
+    }
+}
+
+@Composable
+fun IconButtonPersonalData(
+    modifier: Modifier = Modifier,
+    enabled: Boolean
+) {
+    var buttonEnabled by remember { mutableStateOf(enabled) }
+    IconButton(
+        onClick = { buttonEnabled = !buttonEnabled },
+        modifier = modifier
+            .size(44.dp)
+            .background(if (buttonEnabled){CustomTheme.colors.accent}
+                        else {CustomTheme.colors.background}, shape = CircleShape)
+    ) {
+        Icon(
+            painter = painterResource(id = R.drawable.policy_check),
+            contentDescription = null,
+            tint = CustomTheme.colors.text,
+            modifier = Modifier.size(24.dp)
+        )
+    }
+}
+
 
 @Preview
 @Composable

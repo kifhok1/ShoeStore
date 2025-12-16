@@ -40,9 +40,12 @@ import com.example.shoestore.ui.theme.components.PasswordTextBox
 
 @Composable
 fun RegistrationScreen(modifier: Modifier = Modifier) {
-    var name = ""
+    var name by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
     var personalData by remember { mutableStateOf(false) }
-    Column(modifier = modifier.padding(start = 20.dp, top = 23.dp, end = 20.dp, bottom = 47.dp),
+    Column(modifier = modifier.background(CustomTheme.colors.block)
+                              .padding(start = 20.dp, top = 23.dp, end = 20.dp, bottom = 47.dp),
         horizontalAlignment = Alignment.CenterHorizontally){
         IconButtonBack(
             modifier = Modifier.align(Start)
@@ -69,7 +72,8 @@ fun RegistrationScreen(modifier: Modifier = Modifier) {
             )
             Spacer(modifier = Modifier.height(12.dp))
             MainTextBox(modifier = Modifier.fillMaxWidth(),
-                        textIn = name,
+                        value = name,
+                        onValueChange = {name = it},
                         placeholder = "xxxxxxxx"
             )
         }
@@ -86,7 +90,8 @@ fun RegistrationScreen(modifier: Modifier = Modifier) {
             )
             Spacer(modifier = Modifier.height(12.dp))
             EmailTextBox(modifier = Modifier.fillMaxWidth(),
-                textIn = name,
+                value = email,
+                onValueChange = {email = it},
                 placeholder = "xyz@gmail.com"
             )
         }
@@ -102,7 +107,8 @@ fun RegistrationScreen(modifier: Modifier = Modifier) {
             )
             Spacer(modifier = Modifier.height(12.dp))
             PasswordTextBox(modifier = Modifier.fillMaxWidth(),
-                textIn = name,
+                value = password,
+                onValueChange = {password = it},
                 placeholder = "• • • • • • • •"
             )
         }
@@ -110,7 +116,8 @@ fun RegistrationScreen(modifier: Modifier = Modifier) {
         Row(modifier = Modifier.height(38.dp)){
             IconButtonPersonalData(
                 modifier = Modifier,
-                enabled = personalData
+                enabled = personalData,
+                onClick = { personalData = !personalData }
             )
             Spacer(modifier = Modifier.width(12.dp))
             Text(

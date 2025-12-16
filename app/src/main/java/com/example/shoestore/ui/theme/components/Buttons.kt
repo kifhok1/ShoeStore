@@ -107,11 +107,12 @@ fun IconButtonBack(
 @Composable
 fun IconButtonPersonalData(
     modifier: Modifier = Modifier,
-    enabled: Boolean
+    enabled: Boolean,
+    onClick: () -> Unit
 ) {
     var buttonEnabled = enabled
     IconButton(
-        onClick = { buttonEnabled = !buttonEnabled },
+        onClick = onClick,
         modifier = modifier
             .size(44.dp)
             .background(
@@ -128,7 +129,7 @@ fun IconButtonPersonalData(
             tint = if (buttonEnabled) {
                 CustomTheme.colors.block
             } else {
-                CustomTheme.colors.block
+                CustomTheme.colors.text
             },
             modifier = Modifier.size(24.dp)
         )

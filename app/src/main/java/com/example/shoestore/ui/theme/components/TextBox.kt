@@ -25,13 +25,13 @@ import com.example.shoestore.ui.theme.CustomTheme
 
 @Composable
 fun MainTextBox(modifier: Modifier = Modifier,
-                textIn: String,
+                value: String,
+                onValueChange: (String) -> Unit,
                 placeholder: String) {
-            var text by rememberSaveable { mutableStateOf(textIn) }
         TextField(
             modifier = modifier,
-            value = text,
-            onValueChange = { text = it },
+            value = value,
+            onValueChange = onValueChange,
             shape = RoundedCornerShape(14.dp),
 
             textStyle = CustomTheme.typography.BodyRegular16,
@@ -65,16 +65,16 @@ fun MainTextBox(modifier: Modifier = Modifier,
 @Composable
 fun PasswordTextBox(
     modifier: Modifier = Modifier,
-    textIn: String,
+    value: String,
+    onValueChange: (String) -> Unit,
     placeholder: String
 ){
-    var text by rememberSaveable { mutableStateOf(textIn) }
     var passwordVisibility by remember { mutableStateOf(false) }
 
     TextField(
         modifier = modifier,
-        value = text,
-        onValueChange = { text = it },
+        value = value,
+        onValueChange = onValueChange,
         shape = RoundedCornerShape(14.dp),
         textStyle = CustomTheme.typography.BodyRegular16,
         placeholder = {
@@ -123,15 +123,15 @@ fun PasswordTextBox(
 @Composable
 fun EmailTextBox(
     modifier: Modifier = Modifier,
-    textIn: String,
+    value: String,
+    onValueChange: (String) -> Unit,
     placeholder: String
 ) {
-    var text by rememberSaveable { mutableStateOf(textIn) }
 
     TextField(
         modifier = modifier,
-        value = text,
-        onValueChange = { text = it },
+        value = value,
+        onValueChange = onValueChange,
         shape = RoundedCornerShape(14.dp),
         textStyle = CustomTheme.typography.BodyRegular16,
         placeholder = {
@@ -168,6 +168,5 @@ fun EmailTextBox(
 @Preview
 @Composable
 private fun Prev() {
-    var text = "12341314"
-    EmailTextBox(textIn = text, placeholder = "123453@gmail.com")
+
 }

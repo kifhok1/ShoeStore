@@ -37,7 +37,6 @@ import com.example.shoestore.ui.theme.components.IconButtonPersonalData
 import com.example.shoestore.ui.theme.components.MainButton
 import com.example.shoestore.ui.theme.components.MainTextBox
 import com.example.shoestore.ui.theme.components.PasswordTextBox
-import com.example.shoestore.ui.theme.components.TextBoxButton
 
 @Composable
 fun RegistrationScreen(modifier: Modifier = Modifier) {

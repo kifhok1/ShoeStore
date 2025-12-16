@@ -17,7 +17,7 @@
     <string name="Sign_up">Sign up</string>
     <string name="Sign_In">Sign In</string>
     <string name="Create_Account">New User? Create Account</string>
-    <string name="Already_Have_Account">Already Have Account? Log In</string>
+    <string name="Already_Have_Account">Already Have Account?</string>
     <string name="Recovery_Password">Recovery Password</string>
     <string name="Forgot_Password">Forgot Password</string>
     <string name="Enter_your_Email">Enter your Email account to reset your password</string>

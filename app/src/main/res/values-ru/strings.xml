@@ -18,7 +18,7 @@
     <string name="Sign_up">Зарегистрироваться</string>
     <string name="Sign_In">Войти</string>
     <string name="Create_Account">Вы впервые? Создать пользователя</string>
-    <string name="Already_Have_Account">Есть аккаунт? Войти</string>
+    <string name="Already_Have_Account">Есть аккаунт?</string>
     <string name="Recovery_Password">Воcстановить</string>
     <string name="Forgot_Password">Забыл пароль</string>
     <string name="Enter_your_Email">Введите свою учетную запись для сброса</string>

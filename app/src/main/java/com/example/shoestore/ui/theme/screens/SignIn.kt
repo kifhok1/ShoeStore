@@ -43,7 +43,7 @@ import com.example.shoestore.ui.theme.components.PasswordTextBox
 fun SignIn(modifier: Modifier = Modifier) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var personalData by remember { mutableStateOf(false) }
+    var personalData by remember { mutableStateOf(true) }
     Column(modifier = modifier.background(CustomTheme.colors.block)
         .padding(start = 20.dp, top = 23.dp, end = 20.dp, bottom = 47.dp),
         horizontalAlignment = Alignment.CenterHorizontally){
@@ -56,9 +56,9 @@ fun SignIn(modifier: Modifier = Modifier) {
             color = CustomTheme.colors.text
         )
         Spacer(modifier = Modifier.height(8.dp))
-        Text(style = CustomTheme.typography.BodyRegular24,
+        Text(style = CustomTheme.typography.BodyRegular16,
             text = stringResource(R.string.Fill_your_details),
-            color = CustomTheme.colors.text
+            color = CustomTheme.colors.hint
         )
         Spacer(modifier = Modifier.height(54.dp))
         Spacer(modifier = Modifier.height(12.dp))

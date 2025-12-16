@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.shoestore.ui.theme.ShoeStoreTheme
+import com.example.shoestore.ui.theme.screens.ForgotPassword
 import com.example.shoestore.ui.theme.screens.RegistrationScreen
 
 class MainActivity : ComponentActivity() {
@@ -32,7 +33,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun Greeting(modifier: Modifier = Modifier) {
-    RegistrationScreen(modifier = modifier)
+    ForgotPassword(modifier = modifier)
 }
 
 @Preview

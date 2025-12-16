@@ -56,9 +56,9 @@ fun RegistrationScreen(modifier: Modifier = Modifier) {
             color = CustomTheme.colors.text
         )
         Spacer(modifier = Modifier.height(8.dp))
-        Text(style = CustomTheme.typography.BodyRegular24,
+        Text(style = CustomTheme.typography.BodyRegular16,
             text = stringResource(R.string.Fill_your_details),
-            color = CustomTheme.colors.text
+            color = CustomTheme.colors.hint
         )
         Spacer(modifier = Modifier.height(54.dp))
         Card(modifier = Modifier.fillMaxWidth(),

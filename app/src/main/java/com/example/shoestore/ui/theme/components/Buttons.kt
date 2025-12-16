@@ -109,18 +109,27 @@ fun IconButtonPersonalData(
     modifier: Modifier = Modifier,
     enabled: Boolean
 ) {
-    var buttonEnabled by remember { mutableStateOf(enabled) }
+    var buttonEnabled = enabled
     IconButton(
         onClick = { buttonEnabled = !buttonEnabled },
         modifier = modifier
             .size(44.dp)
-            .background(if (buttonEnabled){CustomTheme.colors.accent}
-                        else {CustomTheme.colors.background}, shape = CircleShape)
+            .background(
+                if (buttonEnabled) {
+                    CustomTheme.colors.accent
+                } else {
+                    CustomTheme.colors.background
+                }, shape = RoundedCornerShape(14.dp)
+            )
     ) {
         Icon(
             painter = painterResource(id = R.drawable.policy_check),
             contentDescription = null,
-            tint = CustomTheme.colors.text,
+            tint = if (buttonEnabled) {
+                CustomTheme.colors.block
+            } else {
+                CustomTheme.colors.block
+            },
             modifier = Modifier.size(24.dp)
         )
     }

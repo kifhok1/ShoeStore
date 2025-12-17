@@ -1,14 +1,18 @@
 package com.example.shoestore.ui.theme.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.snapping.SnapPosition
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -281,47 +285,59 @@ fun OtpTextField(
 }
 
 @Composable
-fun OtpTextBox(modifier: Modifier = Modifier,
-                value: String,
-                onValueChange: (String) -> Unit) {
-    TextField(
-        modifier = modifier,
+fun OtpTextBox(
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    length: Int = 6
+) {
+    BasicTextField(
         value = value,
-        onValueChange = { newText ->
-            if (newText.length <= 6) {
-                onValueChange(newText)
+        onValueChange = { new ->
+            if (new.length <= length && new.all { it.isDigit() }) {
+                onValueChange(new)
             }
         },
-        shape = RoundedCornerShape(14.dp),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        decorationBox = {
+            Row(
+                modifier = modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                repeat(length) { index ->
+                    val isFocused = value.length == index
+                    val char = value.getOrNull(index)?.toString() ?: ""
 
-        textStyle = CustomTheme.typography.BodyRegular16,
-        placeholder = {
-            Text(
-                text = "000000",
-                color = CustomTheme.colors.hint,
-                style = CustomTheme.typography.BodyRegular16
-            )
-        },
-        colors = TextFieldDefaults.colors(
-            focusedContainerColor = CustomTheme.colors.background,
-            unfocusedContainerColor = CustomTheme.colors.background,
-            disabledContainerColor = CustomTheme.colors.background,
-            errorContainerColor = CustomTheme.colors.background,
-
-            cursorColor = CustomTheme.colors.accent,
-            focusedIndicatorColor = CustomTheme.colors.accent,
-            unfocusedIndicatorColor = CustomTheme.colors.background,
-            disabledIndicatorColor = CustomTheme.colors.background,
-            errorIndicatorColor = CustomTheme.colors.red,
-
-            errorTextColor = CustomTheme.colors.red,
-            unfocusedTextColor = CustomTheme.colors.text,
-            focusedTextColor = CustomTheme.colors.text
-        ),
-        singleLine = true,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    Box(
+                        modifier = Modifier
+                            .size(width = 44.dp, height = 80.dp)
+                            .background(
+                                color = CustomTheme.colors.background,
+                                shape = RoundedCornerShape(16.dp)
+                            )
+                            .then(
+                                if (isFocused)
+                                    Modifier.border(
+                                        width = 1.dp,
+                                        color = CustomTheme.colors.red,
+                                        shape = RoundedCornerShape(16.dp)
+                                    )
+                                else Modifier
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = char,
+                            style = CustomTheme.typography.BodyRegular16,
+                            color = CustomTheme.colors.text
+                        )
+                    }
+                }
+            }
+        }
     )
 }
+
 
 
 @Preview

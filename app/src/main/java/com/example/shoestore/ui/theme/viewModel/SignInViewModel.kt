@@ -22,6 +22,7 @@ class SignInViewModel : ViewModel() {
 
     fun signIn(email: String, password: String) {
         viewModelScope.launch {
+            _signInState.value = SignInState.Loading
             try {
                 val response = RetrofitInstance.userManagementService.signIn(
                     SignInRequest(email, password)

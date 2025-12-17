@@ -16,6 +16,7 @@ class SignUpViewModel: ViewModel() {
 
     fun signUp(signUpRequest: SignUpRequest) {
         viewModelScope.launch {
+            _signUpState.value = SignUpState.Loading // 1. Включаем индикацию загрузки
             try {
                 val response = RetrofitInstance.userManagementService.signUp(signUpRequest)
                 if (response.isSuccessful) {
@@ -44,6 +45,7 @@ class SignUpViewModel: ViewModel() {
         }
     }
 
+    // Метод для сброса ошибки, чтобы закрыть диалог и вернуть UI в исходное состояние
     fun resetState() {
         _signUpState.value = SignUpState.Idle
     }

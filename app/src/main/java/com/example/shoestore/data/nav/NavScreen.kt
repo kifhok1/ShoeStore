@@ -27,8 +27,7 @@ fun NavigationScreen(navController: NavHostController) {
             RegistrationScreen(
                 modifier = Modifier.fillMaxSize().background(color = CustomTheme.colors.block),
                 onBackClick = { navController.popBackStack() },
-                onSignInClick = { navController.navigate("sign_in") },
-                onOtpClick = { email -> navController.navigate("otp_verification/$email") }
+                onSignInClick = { navController.navigate("sign_in") }
             )
         }
 

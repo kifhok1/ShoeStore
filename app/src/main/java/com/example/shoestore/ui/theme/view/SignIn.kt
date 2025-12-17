@@ -2,6 +2,7 @@ package com.example.shoestore.ui.theme.view
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,37 +11,84 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.End
 import androidx.compose.ui.Alignment.Companion.Start
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.shoestore.R
+import com.example.shoestore.data.model.SignInState
 import com.example.shoestore.ui.theme.CustomTheme
 import com.example.shoestore.ui.theme.components.EmailTextBox
 import com.example.shoestore.ui.theme.components.IconButtonBack
 import com.example.shoestore.ui.theme.components.MainButton
 import com.example.shoestore.ui.theme.components.PasswordTextBox
+import com.example.shoestore.ui.theme.viewModel.SignInViewModel
 
 @Composable
 fun SignIn(modifier: Modifier = Modifier,
+           signInViewModel: SignInViewModel = viewModel(),
            onRegisterClick: () -> Unit,
            onBackClick: () -> Unit,
            onForgotPasswordClick: () -> Unit,
            onHome: () -> Unit) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var personalData by remember { mutableStateOf(true) }
+
+    var showDialog by remember { mutableStateOf(false) }
+    var dialogMessage by remember { mutableStateOf("") }
+
+    val signInState by signInViewModel.signInState.collectAsState()
+
+    LaunchedEffect(signInState) {
+        when (signInState) {
+            is SignInState.Success -> {
+                onHome()
+                signInViewModel.resetState()
+            }
+            is SignInState.Error -> {
+                dialogMessage = (signInState as SignInState.Error).message
+                showDialog = true
+                signInViewModel.resetState()
+            }
+            else -> {}
+        }
+    }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text(text = "Ошибка") },
+            text = { Text(text = dialogMessage) },
+            confirmButton = {
+                Button(onClick = { showDialog = false }) {
+                    Text("OK")
+                }
+            },
+            containerColor = CustomTheme.colors.block,
+            titleContentColor = CustomTheme.colors.text,
+            textContentColor = CustomTheme.colors.text
+        )
+    }
+
     Column(modifier = modifier.background(CustomTheme.colors.block)
         .padding(start = 20.dp, top = 23.dp, end = 20.dp, bottom = 47.dp),
         horizontalAlignment = Alignment.CenterHorizontally){
@@ -103,9 +151,17 @@ fun SignIn(modifier: Modifier = Modifier,
         )
         Spacer(modifier = Modifier.height(24.dp))
         MainButton(modifier = Modifier.fillMaxWidth().height(50.dp),
-            enabled = personalData,
+            enabled = email.matches(Regex("^[a-z0-9]+@[a-z0-9]+\\.[a-z0-9]{2,3}$")),
             text = stringResource(R.string.Sign_In),
-            onClick = {onHome})
+            onClick = {
+                if (email.isBlank() || password.isBlank()) {
+                    dialogMessage = "Поля не могут быть пустыми"
+                    showDialog = true
+                }
+                else {
+                    signInViewModel.signIn(email, password)
+                }
+            })
         Spacer(modifier = Modifier.weight(1f))
 
         Row(modifier = Modifier.clickable(onClick = { onRegisterClick() })){
@@ -121,6 +177,17 @@ fun SignIn(modifier: Modifier = Modifier,
                 text = stringResource(R.string.Create_Account_Name),
                 color = CustomTheme.colors.text
             )
+        }
+    }
+    if (signInState is SignInState.Loading) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White.copy(alpha = 0.3f))
+                .clickable(enabled = false) {}, // Блокировка кликов
+            contentAlignment = Center
+        ) {
+            CircularProgressIndicator(color = CustomTheme.colors.accent)
         }
     }
 }

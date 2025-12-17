@@ -2,6 +2,7 @@ package com.example.shoestore.ui.theme.view
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,19 +14,27 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.Start
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.shoestore.R
+import com.example.shoestore.data.model.SignInState
+import com.example.shoestore.data.model.SignUpState
 import com.example.shoestore.ui.theme.CustomTheme
 import com.example.shoestore.ui.theme.components.EmailTextBox
 import com.example.shoestore.ui.theme.components.IconButtonBack
@@ -33,16 +42,53 @@ import com.example.shoestore.ui.theme.components.IconButtonPersonalData
 import com.example.shoestore.ui.theme.components.MainButton
 import com.example.shoestore.ui.theme.components.MainTextBox
 import com.example.shoestore.ui.theme.components.PasswordTextBox
+import com.example.shoestore.ui.theme.viewModel.SignUpViewModel
 
 @Composable
 fun RegistrationScreen(modifier: Modifier = Modifier,
                        onSignInClick: () -> Unit,
                        onBackClick: () -> Unit,
-                       onOtpClick: (String) -> Unit) {
+                       viewModel: SignUpViewModel = androidx.lifecycle.viewmodel.compose.viewModel()){
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var personalData by remember { mutableStateOf(false) }
+
+    val signUpState by viewModel.signUpState.collectAsState()
+
+    LaunchedEffect(signUpState) {
+        if (signUpState is SignUpState.Success) {
+            onSignInClick()
+            viewModel.resetState()
+        }
+    }
+
+    if (signUpState is SignUpState.Error) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { viewModel.resetState() },
+            title = { Text(text = "Error") },
+            text = { Text(text = (signUpState as SignUpState.Error).message) },
+            confirmButton = {
+                androidx.compose.material3.TextButton(
+                    onClick = { viewModel.resetState() }
+                ) {
+                    Text("OK")
+                }
+            }
+        )
+    }
+
+    if (signUpState is SignUpState.Loading) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White.copy(alpha = 0.3f))
+                .clickable(enabled = false) {},
+            contentAlignment = Center
+        ) {
+            CircularProgressIndicator(color = CustomTheme.colors.accent)
+        }
+    }
     Column(modifier = modifier
         .background(CustomTheme.colors.block)
         .padding(start = 20.dp, top = 23.dp, end = 20.dp, bottom = 47.dp),
@@ -131,9 +177,15 @@ fun RegistrationScreen(modifier: Modifier = Modifier,
         MainButton(modifier = Modifier
             .fillMaxWidth()
             .height(50.dp),
-                   enabled = personalData,
+                   enabled = personalData && email.matches(Regex("^[a-z0-9]+@[a-z0-9]+\\.[a-z0-9]{2,3}$"))
+                           && signUpState !is SignUpState.Loading,
                    text = stringResource(R.string.Sign_up),
-                   onClick = { onOtpClick("324") })
+                   onClick = { viewModel.signUp(
+                       com.example.shoestore.data.model.SignUpRequest(
+                           email = email,
+                           password = password
+                       )
+                   ) })
         Spacer(modifier = Modifier.weight(1f))
 
         Row(modifier = Modifier.clickable(onClick = {onSignInClick()})){

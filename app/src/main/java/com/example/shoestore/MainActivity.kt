@@ -7,39 +7,27 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.rememberNavController
+import com.example.shoestore.data.nav.NavigationScreen
+import com.example.shoestore.ui.theme.CustomTheme
 import com.example.shoestore.ui.theme.ShoeStoreTheme
-import com.example.shoestore.ui.theme.screens.ForgotPassword
-import com.example.shoestore.ui.theme.screens.RegistrationScreen
+import com.example.shoestore.ui.theme.view.Verification
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+            val navController = rememberNavController()
             ShoeStoreTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                Scaffold(modifier = Modifier.fillMaxSize()) {
+                    NavigationScreen(navController = navController)
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(modifier: Modifier = Modifier) {
-    ForgotPassword(modifier = modifier)
-}
-
-@Preview
-@Composable
-fun GreetingPreview() {
-    ShoeStoreTheme {
-        Greeting()
     }
 }

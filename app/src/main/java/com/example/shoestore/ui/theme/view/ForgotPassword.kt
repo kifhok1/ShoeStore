@@ -1,4 +1,4 @@
-package com.example.shoestore.ui.theme.screens
+package com.example.shoestore.ui.theme.view
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -31,22 +31,29 @@ import com.example.shoestore.ui.theme.components.IconButtonBack
 import com.example.shoestore.ui.theme.components.MainButton
 
 @Composable
-fun ForgotPassword(modifier: Modifier = Modifier) {
+fun ForgotPassword(modifier: Modifier = Modifier,
+                   onBackClick: () -> Unit,
+                   onOTPClick: (String) -> Unit) {
     var email by remember { mutableStateOf("") }
     var personalData by remember { mutableStateOf(true) }
     var showDialog by remember { mutableStateOf(false) }
 
     if (showDialog) {
         EmailSentDialog(
-            onDismissRequest = { showDialog = false }
+            onDismissRequest = {
+                showDialog = false
+                onOTPClick("242525")
+            }
         )
     }
-    Column(modifier = modifier.background(CustomTheme.colors.block)
+    Column(modifier = modifier
+        .background(CustomTheme.colors.block)
         .padding(start = 20.dp, top = 23.dp, end = 20.dp, bottom = 47.dp),
         horizontalAlignment = Alignment.CenterHorizontally){
         IconButtonBack(
+            onClick = { onBackClick() },
             modifier = Modifier.align(Start)
-        ){}
+        )
         Spacer(modifier = Modifier.height(11.dp))
         Text(style = CustomTheme.typography.HeadingRegular32,
             text = stringResource(R.string.Forgot_Password),
@@ -73,7 +80,9 @@ fun ForgotPassword(modifier: Modifier = Modifier) {
             )
         }
         Spacer(modifier = Modifier.height(40.dp))
-        MainButton(modifier = Modifier.fillMaxWidth().height(50.dp),
+        MainButton(modifier = Modifier
+            .fillMaxWidth()
+            .height(50.dp),
             enabled = personalData,
             text = stringResource(R.string.Sign_In),
             onClick = {
@@ -85,6 +94,4 @@ fun ForgotPassword(modifier: Modifier = Modifier) {
 
 @Preview
 @Composable
-private fun Prew() {
-    ForgotPassword(modifier = Modifier.fillMaxSize().background(color = CustomTheme.colors.block))
-}
+private fun Prew() {}

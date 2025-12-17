@@ -1,4 +1,4 @@
-package com.example.shoestore.ui.theme.screens
+package com.example.shoestore.ui.theme.view
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -32,7 +32,10 @@ import com.example.shoestore.ui.theme.components.IconButtonBack
 import com.example.shoestore.ui.theme.components.OtpTextBox
 
 @Composable
-fun Verification(modifier: Modifier = Modifier) {
+fun Verification(modifier: Modifier = Modifier,
+                 email: String,
+                 onBackClick: () -> Unit,
+                 onSuccess: () -> Unit) {
     var otp by remember { mutableStateOf("") }
     var timeLeft by remember { mutableStateOf(30) }      // в секундах
     val isTimerFinished = timeLeft <= 0
@@ -45,12 +48,22 @@ fun Verification(modifier: Modifier = Modifier) {
         }
     }
 
-    Column(modifier = modifier.background(CustomTheme.colors.block)
+    LaunchedEffect(key1 = otp)
+    {
+        // Тут типо проверка на правильность кода подтверждания
+        if (otp.length == 6){
+            onSuccess()
+        }
+    }
+
+    Column(modifier = modifier
+        .background(CustomTheme.colors.block)
         .padding(start = 20.dp, top = 23.dp, end = 20.dp, bottom = 47.dp),
         horizontalAlignment = Alignment.CenterHorizontally){
         IconButtonBack(
+            onClick = { onBackClick() },
             modifier = Modifier.align(Start)
-        ){}
+        )
         Spacer(modifier = Modifier.height(11.dp))
         Text(style = CustomTheme.typography.HeadingRegular32,
             text = stringResource(R.string.OTP_Verification),
@@ -110,6 +123,4 @@ fun Verification(modifier: Modifier = Modifier) {
 
 @Preview
 @Composable
-private fun Prew() {
-    Verification(modifier = Modifier.fillMaxSize().background(color = CustomTheme.colors.block))
-}
+private fun Prew() {}

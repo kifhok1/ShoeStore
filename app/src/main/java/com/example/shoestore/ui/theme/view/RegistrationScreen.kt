@@ -1,4 +1,4 @@
-package com.example.shoestore.ui.theme.screens
+package com.example.shoestore.ui.theme.view
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -35,17 +35,22 @@ import com.example.shoestore.ui.theme.components.MainTextBox
 import com.example.shoestore.ui.theme.components.PasswordTextBox
 
 @Composable
-fun RegistrationScreen(modifier: Modifier = Modifier) {
+fun RegistrationScreen(modifier: Modifier = Modifier,
+                       onSignInClick: () -> Unit,
+                       onBackClick: () -> Unit,
+                       onOtpClick: (String) -> Unit) {
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var personalData by remember { mutableStateOf(false) }
-    Column(modifier = modifier.background(CustomTheme.colors.block)
-                              .padding(start = 20.dp, top = 23.dp, end = 20.dp, bottom = 47.dp),
+    Column(modifier = modifier
+        .background(CustomTheme.colors.block)
+        .padding(start = 20.dp, top = 23.dp, end = 20.dp, bottom = 47.dp),
         horizontalAlignment = Alignment.CenterHorizontally){
         IconButtonBack(
+            onClick = { onBackClick() },
             modifier = Modifier.align(Start)
-        ){}
+        )
         Spacer(modifier = Modifier.height(11.dp))
         Text(style = CustomTheme.typography.HeadingRegular32,
              text = stringResource(R.string.Register_Account),
@@ -123,13 +128,15 @@ fun RegistrationScreen(modifier: Modifier = Modifier) {
             )
         }
         Spacer(modifier = Modifier.height(24.dp))
-        MainButton(modifier = Modifier.fillMaxWidth().height(50.dp),
+        MainButton(modifier = Modifier
+            .fillMaxWidth()
+            .height(50.dp),
                    enabled = personalData,
                    text = stringResource(R.string.Sign_up),
-                   onClick = {})
+                   onClick = { onOtpClick("324") })
         Spacer(modifier = Modifier.weight(1f))
 
-        Row(modifier = Modifier.clickable(onClick = {})){
+        Row(modifier = Modifier.clickable(onClick = {onSignInClick()})){
             Text(style = CustomTheme.typography.BodyRegular16,
                 text = stringResource(R.string.Already_Have_Account),
                 color = CustomTheme.colors.hint
@@ -149,5 +156,4 @@ fun RegistrationScreen(modifier: Modifier = Modifier) {
 @Preview
 @Composable
 private fun Prew() {
-    RegistrationScreen(modifier = Modifier.fillMaxSize().background(color = CustomTheme.colors.block))
 }

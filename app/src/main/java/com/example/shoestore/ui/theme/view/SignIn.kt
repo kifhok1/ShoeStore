@@ -1,4 +1,4 @@
-package com.example.shoestore.ui.theme.screens
+package com.example.shoestore.ui.theme.view
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -33,7 +33,11 @@ import com.example.shoestore.ui.theme.components.MainButton
 import com.example.shoestore.ui.theme.components.PasswordTextBox
 
 @Composable
-fun CreateNewPassword(modifier: Modifier = Modifier) {
+fun SignIn(modifier: Modifier = Modifier,
+           onRegisterClick: () -> Unit,
+           onBackClick: () -> Unit,
+           onForgotPasswordClick: () -> Unit,
+           onHome: () -> Unit) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var personalData by remember { mutableStateOf(true) }
@@ -41,16 +45,17 @@ fun CreateNewPassword(modifier: Modifier = Modifier) {
         .padding(start = 20.dp, top = 23.dp, end = 20.dp, bottom = 47.dp),
         horizontalAlignment = Alignment.CenterHorizontally){
         IconButtonBack(
+            onClick = { onBackClick() },
             modifier = Modifier.align(Start)
-        ){}
+        )
         Spacer(modifier = Modifier.height(11.dp))
         Text(style = CustomTheme.typography.HeadingRegular32,
-            text = stringResource(R.string.Set_new_password),
+            text = stringResource(R.string.Hello_Again),
             color = CustomTheme.colors.text
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(style = CustomTheme.typography.BodyRegular16,
-            text = stringResource(R.string.Set_a_New_Password),
+            text = stringResource(R.string.Fill_your_details),
             color = CustomTheme.colors.hint
         )
         Spacer(modifier = Modifier.height(54.dp))
@@ -61,6 +66,23 @@ fun CreateNewPassword(modifier: Modifier = Modifier) {
             ),
             shape = RoundedCornerShape(0.dp)
         ) {
+            Text(style = CustomTheme.typography.BodyRegular20,
+                text = stringResource(R.string.Email_Address),
+                color = CustomTheme.colors.text
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            EmailTextBox(modifier = Modifier.fillMaxWidth(),
+                value = email,
+                onValueChange = {email = it},
+                placeholder = "xyz@gmail.com"
+            )
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+        Card(modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = CustomTheme.colors.block
+            ),
+            shape = RoundedCornerShape(0.dp)) {
             Text(style = CustomTheme.typography.BodyRegular20,
                 text = stringResource(R.string.Password),
                 color = CustomTheme.colors.text
@@ -73,34 +95,36 @@ fun CreateNewPassword(modifier: Modifier = Modifier) {
             )
         }
         Spacer(modifier = Modifier.height(12.dp))
-        Card(modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(
-                containerColor = CustomTheme.colors.block
-            ),
-            shape = RoundedCornerShape(0.dp)) {
-            Text(style = CustomTheme.typography.BodyRegular20,
-                text = stringResource(R.string.Confirm_password),
-                color = CustomTheme.colors.text
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            PasswordTextBox(modifier = Modifier.fillMaxWidth(),
-                value = password,
-                onValueChange = {password = it},
-                placeholder = "• • • • • • • •"
-            )
-        }
-        Spacer(modifier = Modifier.height(40.dp))
+        Text(
+            modifier = Modifier.align(End).clickable(onClick = { onForgotPasswordClick() }),
+            style = CustomTheme.typography.BodyRegular12,
+            text = stringResource(R.string.Recovery_Password),
+            color = CustomTheme.colors.hint
+        )
+        Spacer(modifier = Modifier.height(24.dp))
         MainButton(modifier = Modifier.fillMaxWidth().height(50.dp),
             enabled = personalData,
-            text = stringResource(R.string.save_Now),
-            onClick = {})
+            text = stringResource(R.string.Sign_In),
+            onClick = {onHome})
         Spacer(modifier = Modifier.weight(1f))
 
+        Row(modifier = Modifier.clickable(onClick = { onRegisterClick() })){
+            Text(style = CustomTheme.typography.BodyRegular16,
+                text = stringResource(R.string.Create_Account),
+                color = CustomTheme.colors.hint
+            )
+            Text(style = CustomTheme.typography.BodyRegular16,
+                text = " ",
+                color = CustomTheme.colors.hint
+            )
+            Text(style = CustomTheme.typography.BodyRegular16,
+                text = stringResource(R.string.Create_Account_Name),
+                color = CustomTheme.colors.text
+            )
+        }
     }
 }
 
 @Preview
 @Composable
-private fun Prew() {
-    CreateNewPassword(modifier = Modifier.fillMaxSize().background(color = CustomTheme.colors.block))
-}
+private fun Prew() {}

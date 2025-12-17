@@ -1,7 +1,9 @@
 package com.example.shoestore.ui.theme.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,22 +27,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.shoestore.R
 import com.example.shoestore.ui.theme.CustomTheme
-import com.example.shoestore.ui.theme.components.EmailSentDialog
-import com.example.shoestore.ui.theme.components.EmailTextBox
 import com.example.shoestore.ui.theme.components.IconButtonBack
-import com.example.shoestore.ui.theme.components.MainButton
+import com.example.shoestore.ui.theme.components.OtpTextBox
 
 @Composable
-fun ForgotPassword(modifier: Modifier = Modifier) {
-    var email by remember { mutableStateOf("") }
-    var personalData by remember { mutableStateOf(true) }
-    var showDialog by remember { mutableStateOf(false) }
+fun Verification(modifier: Modifier = Modifier) {
+    var otp by remember { mutableStateOf("") }
 
-    if (showDialog) {
-        EmailSentDialog(
-            onDismissRequest = { showDialog = false }
-        )
-    }
     Column(modifier = modifier.background(CustomTheme.colors.block)
         .padding(start = 20.dp, top = 23.dp, end = 20.dp, bottom = 47.dp),
         horizontalAlignment = Alignment.CenterHorizontally){
@@ -49,13 +42,13 @@ fun ForgotPassword(modifier: Modifier = Modifier) {
         ){}
         Spacer(modifier = Modifier.height(11.dp))
         Text(style = CustomTheme.typography.HeadingRegular32,
-            text = stringResource(R.string.Forgot_Password),
+            text = stringResource(R.string.OTP_Verification),
             color = CustomTheme.colors.text
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(style = CustomTheme.typography.BodyRegular16,
             textAlign = TextAlign.Center,
-            text = stringResource(R.string.Enter_your_Email),
+            text = stringResource(R.string.check_your_email),
             color = CustomTheme.colors.hint
         )
         Spacer(modifier = Modifier.height(54.dp))
@@ -66,19 +59,32 @@ fun ForgotPassword(modifier: Modifier = Modifier) {
             ),
             shape = RoundedCornerShape(0.dp)
         ) {
-            EmailTextBox(modifier = Modifier.fillMaxWidth(),
-                value = email,
-                onValueChange = {email = it},
-                placeholder = "xyz@gmail.com"
+            Text(style = CustomTheme.typography.BodyRegular20,
+                text = stringResource(R.string.OTP_Code),
+                color = CustomTheme.colors.text
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            OtpTextBox(modifier = Modifier.fillMaxWidth(),
+                value = otp,
+                onValueChange = {otp = it}
             )
         }
-        Spacer(modifier = Modifier.height(40.dp))
-        MainButton(modifier = Modifier.fillMaxWidth().height(50.dp),
-            enabled = personalData,
-            text = stringResource(R.string.Sign_In),
-            onClick = {
-                showDialog = !showDialog
-            })
+        Spacer(modifier = Modifier.height(20.dp))
+        Row(){
+            Text(
+                modifier = Modifier.clickable(onClick = {}),
+                style = CustomTheme.typography.BodyRegular12,
+                text = stringResource(R.string.resend),
+                color = CustomTheme.colors.hint
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            Text(
+                modifier = Modifier,
+                style = CustomTheme.typography.BodyRegular12,
+                text = "0:30",
+                color = CustomTheme.colors.hint
+            )
+        }
         Spacer(modifier = Modifier.weight(1f))
     }
 }
@@ -86,5 +92,5 @@ fun ForgotPassword(modifier: Modifier = Modifier) {
 @Preview
 @Composable
 private fun Prew() {
-    ForgotPassword(modifier = Modifier.fillMaxSize().background(color = CustomTheme.colors.block))
+    Verification(modifier = Modifier.fillMaxSize().background(color = CustomTheme.colors.block))
 }

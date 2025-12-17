@@ -23,6 +23,7 @@
     <string name="Forgot_Password">Forgot Password</string>
     <string name="Enter_your_Email">Enter your Email account to reset your password</string>
     <string name="Send">Send</string>
+    <string name="resend">Resend</string>
     <string name="Check_your_email">Check your email</string>
     <string name="send_password_recovery_code">We have send password recovery code in your email</string>
     <string name="OTP_Verification">OTP Verification</string>
@@ -66,7 +67,7 @@
     <string name="Change_Profile_Picture">Change Profile Picture</string>
     <string name="Name">Your Name</string>
     <string name="Last_Name">Last Name</string>
-    <string name="save_Now">save Now</string>
+    <string name="save_Now">Save now</string>
     <string name="confirm">confirm</string>
     <string name="Map">Map</string>
     <string name="Loyalty_Card">Loyalty Card</string>

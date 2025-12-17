@@ -14,6 +14,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,6 +34,16 @@ import com.example.shoestore.ui.theme.components.OtpTextBox
 @Composable
 fun Verification(modifier: Modifier = Modifier) {
     var otp by remember { mutableStateOf("") }
+    var timeLeft by remember { mutableStateOf(30) }      // в секундах
+    val isTimerFinished = timeLeft <= 0
+
+    // Простой таймер на LaunchedEffect: раз в секунду уменьшаем timeLeft
+    LaunchedEffect(key1 = timeLeft) {
+        if (timeLeft > 0) {
+            kotlinx.coroutines.delay(1000L)
+            timeLeft -= 1
+        }
+    }
 
     Column(modifier = modifier.background(CustomTheme.colors.block)
         .padding(start = 20.dp, top = 23.dp, end = 20.dp, bottom = 47.dp),
@@ -71,19 +82,27 @@ fun Verification(modifier: Modifier = Modifier) {
         }
         Spacer(modifier = Modifier.height(20.dp))
         Row(){
-            Text(
-                modifier = Modifier.clickable(onClick = {}),
-                style = CustomTheme.typography.BodyRegular12,
-                text = stringResource(R.string.resend),
-                color = CustomTheme.colors.hint
-            )
+            if (isTimerFinished) {
+                Text(
+                    modifier = Modifier.clickable(onClick = {}),
+                    style = CustomTheme.typography.BodyRegular12,
+                    text = stringResource(R.string.resend),
+                    color = CustomTheme.colors.hint
+                )
+            }
             Spacer(modifier = Modifier.weight(1f))
-            Text(
-                modifier = Modifier,
-                style = CustomTheme.typography.BodyRegular12,
-                text = "0:30",
-                color = CustomTheme.colors.hint
-            )
+            // Сам таймер: показываем только пока не закончился
+            if (!isTimerFinished) {
+                val minutes = timeLeft / 60
+                val seconds = timeLeft % 60
+                val timeText = String.format("%d:%02d", minutes, seconds)
+
+                Text(
+                    style = CustomTheme.typography.BodyRegular12,
+                    text = timeText,
+                    color = CustomTheme.colors.hint
+                )
+            }
         }
         Spacer(modifier = Modifier.weight(1f))
     }

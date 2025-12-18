@@ -12,6 +12,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.compose.rememberNavController
 import com.example.shoestore.data.model.PreferencesManager
 import com.example.shoestore.data.nav.NavigationScreen
@@ -31,6 +34,15 @@ class MainActivity : ComponentActivity() {
         if (isFirstLaunch) {
             preferencesManager.setFirstLaunchCompleted()
         }
+
+        // 1. Убираем рамки (делаем приложение на весь экран)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        // 2. Прячем системные панели (Статус бар сверху и Навигацию снизу)
+        val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
+        windowInsetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE // Появятся только если свайпнуть от края
+        windowInsetsController.hide(WindowInsetsCompat.Type.systemBars()) // Скрыть всё
+
         setContent {
             val navController = rememberNavController()
             ShoeStoreTheme {

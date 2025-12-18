@@ -6,13 +6,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.key.Key.Companion.Home
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.shoestore.ui.theme.CustomTheme
 import com.example.shoestore.ui.theme.view.CreateNewPassword
 import com.example.shoestore.ui.theme.view.ForgotPassword
-import com.example.shoestore.ui.theme.view.Home
+import com.example.shoestore.ui.theme.view.MainAppScreen
 import com.example.shoestore.ui.theme.view.RegistrationScreen
 import com.example.shoestore.ui.theme.view.SignIn
 import com.example.shoestore.ui.theme.view.Verification
@@ -97,7 +98,7 @@ fun NavigationScreen(
         }
 
         composable("home") {
-            Home()
+            MainAppScreen()
         }
     }
 }

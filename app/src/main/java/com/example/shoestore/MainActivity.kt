@@ -1,5 +1,6 @@
 package com.example.shoestore
 
+import OnBoardingScreen
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -12,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
+import com.example.shoestore.data.model.PreferencesManager
 import com.example.shoestore.data.nav.NavigationScreen
 import com.example.shoestore.ui.theme.CustomTheme
 import com.example.shoestore.ui.theme.ShoeStoreTheme
@@ -21,18 +23,25 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        val preferencesManager = PreferencesManager(this)
+        val isFirstLaunch = preferencesManager.isFirstLaunch()
+
+        // Сохраняем флаг после первого запуска
+        if (isFirstLaunch) {
+            preferencesManager.setFirstLaunchCompleted()
+        }
         setContent {
             val navController = rememberNavController()
             ShoeStoreTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                Scaffold(modifier = Modifier.fillMaxSize()) {
                     NavigationScreen(
                         navController = navController,
-                        modifier = Modifier.padding(innerPadding) // Pass the padding here
+                        modifier = Modifier,
+                        isFirstLaunch = isFirstLaunch
                     )
                 }
-
-            }
-
+          }
         }
     }
 }

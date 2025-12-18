@@ -47,36 +47,41 @@ fun MainButton(modifier: Modifier = Modifier,
     }
 }
 
-//@Composable
-//fun MainButtonIcon(modifier: Modifier = Modifier,
-//               enabled: Boolean,
-//               onClick: () -> Unit,
-//               text: String) {
-//    ShoeStoreTheme {
-//        Button(
-//            onClick = onClick,
-//            modifier = modifier,
-//            colors = ButtonDefaults.buttonColors(
-//                containerColor = CustomTheme.colors.accent,
-//                contentColor = CustomTheme.colors.background,
-//                disabledContainerColor = CustomTheme.colors.disable,
-//                disabledContentColor = CustomTheme.colors.background
-//            ),
-//            enabled = enabled,
-//            shape = RoundedCornerShape(14.dp)
-//        ){
-//            Row(){
-//                Image(
-//                    painter = painterResource(R.drawable.add)
-//                )
-//                Text(
-//                    text = text,
-//                    style = CustomTheme.typography.BodyRegular14
-//                )
-//            }
-//        }
-//    }
-//}
+@Composable
+fun WhiteButton(
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    onClick: () -> Unit,
+    text: String
+) {
+    ShoeStoreTheme {
+        Button(
+            onClick = onClick,
+            modifier = modifier,
+            colors = ButtonDefaults.buttonColors(
+                // Фон кнопки - белый (или цвет фона из темы, если он белый)
+                containerColor = CustomTheme.colors.background,
+                // Цвет текста - черный (или основной цвет текста из темы)
+                contentColor = CustomTheme.colors.text,
+                // Цвета для выключенного состояния
+                disabledContainerColor = CustomTheme.colors.disable,
+                disabledContentColor = CustomTheme.colors.background
+            ),
+            enabled = enabled,
+            // Скругление углов 14.dp, как в оригинале
+            shape = RoundedCornerShape(14.dp),
+            // Убираем тень, если на макете кнопка плоская (опционально)
+            elevation = ButtonDefaults.buttonElevation(0.dp)
+        ) {
+            Text(
+                text = text,
+                // Используем тот же стиль шрифта
+                style = CustomTheme.typography.BodyRegular14
+            )
+        }
+    }
+}
+
 
 @Composable
 fun IconButtonBack(
@@ -134,7 +139,7 @@ fun IconButtonPersonalData(
 @Preview
 @Composable
 private fun Prev() {
-    MainButton(enabled = true,
+    WhiteButton(enabled = true,
                onClick = {},
                text = "1243")
 }

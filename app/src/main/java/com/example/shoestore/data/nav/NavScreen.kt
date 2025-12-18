@@ -1,5 +1,7 @@
 package com.example.shoestore.data.nav
 
+import OnBoardingScreen
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -18,14 +20,31 @@ import com.example.shoestore.ui.theme.view.Verification
 @Composable
 fun NavigationScreen(
     navController: NavHostController,
-    modifier: Modifier = Modifier // 1. Add modifier parameter here
+    modifier: Modifier = Modifier,
+    isFirstLaunch: Boolean
 ) {
+    val startDestination = if (isFirstLaunch) "onboardingscreen" else "sign_in"
+
     NavHost(
         navController = navController,
-        startDestination = "register",
-        modifier = modifier // 2. Apply it to the NavHost
+        startDestination = startDestination,
+        modifier = modifier
     ){
+
+        composable("onboardingscreen") {
+            Log.d("Navigation", "=== Показываем OnBoardingScreen ===")
+            OnBoardingScreen(
+                onFinished = {
+                    Log.d("Navigation", ">>> onFinished ВЫЗВАН!")
+                    navController.navigate("register") {
+                        popUpTo("onboardingscreen") { inclusive = true }
+                    }
+                }
+            )
+        }
+
         composable("register") {
+            Log.d("Navigation", "=== Показываем RegistrationScreen ===")
             RegistrationScreen(
                 modifier = Modifier.fillMaxSize().background(color = CustomTheme.colors.block),
                 onBackClick = { navController.popBackStack() },
@@ -60,13 +79,11 @@ fun NavigationScreen(
                 email = email,
                 onBackClick = { navController.popBackStack() },
                 onSuccess = {
-                    // 3. FIX: Pass the email to the next screen so it can be retrieved
                     navController.navigate("create_new_password/$email")
                 }
             )
         }
 
-        // 4. FIX: Update route to accept {email} argument
         composable("create_new_password/{email}") { backStackEntry ->
             val email = backStackEntry.arguments?.getString("email") ?: ""
 
@@ -84,3 +101,4 @@ fun NavigationScreen(
         }
     }
 }
+

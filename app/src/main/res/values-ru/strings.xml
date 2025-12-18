@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Магазин обуви</string>
-    <string name="Welcome">Добро пожаловать</string>
+    <string name="Welcome">ДОБРО ПОЖАЛОВАТЬ</string>
     <string name="Lets_Start">Начнем путешествие</string>
     <string name="Collection_Explore_Now">Умная, великолепная и модная коллекция Изучите сейчас</string>
     <string name="Power_To">У вас есть сила, чтобы</string>

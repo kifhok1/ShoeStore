@@ -24,9 +24,13 @@ class MainActivity : ComponentActivity() {
         setContent {
             val navController = rememberNavController()
             ShoeStoreTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) {
-                    NavigationScreen(navController = navController)
+                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    NavigationScreen(
+                        navController = navController,
+                        modifier = Modifier.padding(innerPadding) // Pass the padding here
+                    )
                 }
+
             }
         }
     }

@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -16,12 +15,15 @@ import com.example.shoestore.ui.theme.view.RegistrationScreen
 import com.example.shoestore.ui.theme.view.SignIn
 import com.example.shoestore.ui.theme.view.Verification
 
-
 @Composable
-fun NavigationScreen(navController: NavHostController) {
+fun NavigationScreen(
+    navController: NavHostController,
+    modifier: Modifier = Modifier // 1. Add modifier parameter here
+) {
     NavHost(
         navController = navController,
-        startDestination = "register"
+        startDestination = "register",
+        modifier = modifier // 2. Apply it to the NavHost
     ){
         composable("register") {
             RegistrationScreen(
@@ -36,7 +38,7 @@ fun NavigationScreen(navController: NavHostController) {
                 onRegisterClick = { navController.navigate("register") },
                 onBackClick = { navController.popBackStack() },
                 onForgotPasswordClick = { navController.navigate("forgot_password") },
-                onHome = {navController.navigate("home")}
+                onHome = { navController.navigate("home") }
             )
         }
 
@@ -44,7 +46,8 @@ fun NavigationScreen(navController: NavHostController) {
             ForgotPassword(
                 modifier = Modifier.fillMaxSize().background(color = CustomTheme.colors.block),
                 onBackClick = { navController.popBackStack() },
-                onOTPClick = { email -> navController.navigate("otp_verification/$email")
+                onOTPClick = { email ->
+                    navController.navigate("otp_verification/$email")
                 }
             )
         }
@@ -57,18 +60,21 @@ fun NavigationScreen(navController: NavHostController) {
                 email = email,
                 onBackClick = { navController.popBackStack() },
                 onSuccess = {
-                    navController.navigate("create_new_password")
+                    // 3. FIX: Pass the email to the next screen so it can be retrieved
+                    navController.navigate("create_new_password/$email")
                 }
             )
         }
 
-        composable("create_new_password") { backStackEntry ->
+        // 4. FIX: Update route to accept {email} argument
+        composable("create_new_password/{email}") { backStackEntry ->
             val email = backStackEntry.arguments?.getString("email") ?: ""
 
             CreateNewPassword(
                 email = email,
                 onBackClick = { navController.popBackStack() },
-                onSuccess = { navController.navigate("home")
+                onSuccess = {
+                    navController.navigate("home")
                 }
             )
         }

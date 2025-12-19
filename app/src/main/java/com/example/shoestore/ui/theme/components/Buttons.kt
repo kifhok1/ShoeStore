@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.example.shoestore.ui.theme.components
 
 import androidx.compose.foundation.background
@@ -8,7 +6,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -135,11 +132,38 @@ fun IconButtonPersonalData(
     }
 }
 
+@Composable
+fun LikeButton(
+    isFavorite: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val iconRes = if (isFavorite) R.drawable.favorite_fill else R.drawable.favorite
+
+
+    IconButton(
+        onClick = onClick,
+        shape = CircleShape,
+        modifier = modifier
+            .size(28.dp)
+            .background(CustomTheme.colors.background)
+    ) {
+        Icon(
+            painter = painterResource(id = iconRes),
+            contentDescription = null,
+            tint = CustomTheme.colors.red,
+            modifier = modifier
+                .size(16.dp)
+        )
+    }
+}
+
 
 @Preview
 @Composable
 private fun Prev() {
-    WhiteButton(enabled = true,
-               onClick = {},
-               text = "1243")
+    LikeButton(
+        isFavorite = false,
+        onClick = {}
+    )
 }

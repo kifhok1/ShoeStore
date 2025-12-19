@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,12 +30,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.shoestore.R
 import com.example.shoestore.data.model.ProductCardData
 import com.example.shoestore.ui.theme.CustomTheme
@@ -175,67 +172,6 @@ fun ProductCard(
                     )
                 }
             }
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun ProductCardPreview() {
-    Row(
-        modifier = Modifier.background(CustomTheme.colors.background).padding(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            ProductCard(
-                data = ProductCardData(
-                    imageRes = R.drawable.nike,
-                    label = true,
-                    title = "Nike Air Max",
-                    price = "₽752.00",
-                    isFavorite = false,
-                    isInCart = false
-                )
-            )
-
-            ProductCard(
-                data = ProductCardData(
-                    imageRes = R.drawable.nike,
-                    label = true,
-                    title = "Nike Air Max",
-                    price = "₽752.00",
-                    isFavorite = false,
-                    isInCart = true
-                )
-            )
-        }
-
-        Column(
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            ProductCard(
-                data = ProductCardData(
-                    imageRes = R.drawable.nike,
-                    label = true,
-                    title = "Nike Air Max",
-                    price = "₽752.00",
-                    isFavorite = true,
-                    isInCart = false
-                )
-            )
-
-            ProductCard(
-                data = ProductCardData(
-                    imageRes = R.drawable.nike,
-                    label = false,
-                    title = "Nike Air Max",
-                    price = "₽752.00",
-                    isFavorite = true,
-                    isInCart = true
-                )
-            )
         }
     }
 }

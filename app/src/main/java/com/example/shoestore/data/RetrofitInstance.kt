@@ -1,7 +1,9 @@
 package com.example.shoestore.data
 
+import StorageService
+import com.example.shoestore.data.service.CatalogService
+import com.example.shoestore.data.service.FavouriteService
 import com.example.shoestore.data.service.ProfileService
-import com.example.shoestore.data.service.StorageService
 import com.example.shoestore.data.service.UserManagementService
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
@@ -42,4 +44,7 @@ object RetrofitInstance {
     val storageService: StorageService by lazy {
         retrofit.create(StorageService::class.java)
     }
+
+        val catalogService: CatalogService = retrofit.create(CatalogService::class.java)
+        val favouriteService: FavouriteService = retrofit.create(FavouriteService::class.java)
 }

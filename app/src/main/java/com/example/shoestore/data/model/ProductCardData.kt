@@ -8,5 +8,6 @@ data class ProductCardData(
     val isFavorite: Boolean = false,
     val isInCart: Boolean = false,
     val onFavoriteClick: () -> Unit = {},
-    val onAddClick: () -> Unit = {}
+    val onAddClick: () -> Unit = {},
+    val id: String
 )

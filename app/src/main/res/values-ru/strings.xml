@@ -48,7 +48,7 @@
     <string name="Checkout">Оформить заказ</string>
     <string name="Contact_Information">Контактная информация</string>
     <string name="Address">Адрес</string>
-    <string name="phone_number">телефон</string>
+    <string name="phone_number">Телефон</string>
     <string name="Payment_Method">Способ оплаты</string>
     <string name="min_ago">мин назад</string>
     <string name="OPEN">Открыть</string>
@@ -64,12 +64,12 @@
     <string name="Notifications">Уведомления</string>
     <string name="SETTINGS">Настройки</string>
     <string name="Sign_Out">Выйти</string>
-    <string name="Profile">профиль</string>
+    <string name="Profile">Профиль</string>
     <string name="Change_Profile_Picture">Изменить фото профиля</string>
     <string name="Name">Имя</string>
     <string name="Last_Name">Фамилия</string>
     <string name="save_Now">Сохранить</string>
     <string name="confirm">подтвердить</string>
-    <string name="Map">карта</string>
-    <string name="Loyalty_Card">карта лояльности</string>
+    <string name="Map">Карта</string>
+    <string name="Loyalty_Card">Карта лояльности</string>
 </resources>

@@ -1,5 +1,7 @@
 package com.example.shoestore.data
 
+import com.example.shoestore.data.service.ProfileService
+import com.example.shoestore.data.service.StorageService
 import com.example.shoestore.data.service.UserManagementService
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -18,4 +20,6 @@ object RetrofitInstance {
         .build()
 
     val userManagementService = retrofit.create(UserManagementService::class.java)
+    val profileService: ProfileService = retrofit.create(ProfileService::class.java)
+    val storageService: StorageService = retrofit.create(StorageService::class.java)
 }

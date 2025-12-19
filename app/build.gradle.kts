@@ -59,6 +59,8 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     implementation(libs.navigation)
     implementation(libs.androidx.compose.foundation)
+    implementation("io.coil-kt:coil-compose:2.7.0")
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

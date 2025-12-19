@@ -1,5 +1,6 @@
 package com.example.shoestore.ui.theme.view
 
+import android.Manifest
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -14,23 +15,21 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -42,26 +41,29 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.shoestore.R
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.shoestore.ui.theme.Accent
-import com.example.shoestore.ui.theme.Background
+import coil.compose.AsyncImage
+import com.example.shoestore.R
+import com.example.shoestore.data.createTempImageUri
+import com.example.shoestore.data.model.FieldType
+import com.example.shoestore.data.model.ProfileState
 import com.example.shoestore.ui.theme.CustomTheme
-import java.util.jar.Manifest
+import com.example.shoestore.ui.theme.components.EditableProfileField
+import com.example.shoestore.ui.theme.components.MainButton
+import com.example.shoestore.ui.theme.viewModel.ProfileViewModel
 
-@Composable
-fun ProfileScreen() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = "Профиль",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.Black
-        )
-    }
+// Функции валидации
+fun isValidName(name: String): Boolean {
+    return name.isNotEmpty() && name.length >= 2 && name.all { it.isLetter() || it.isWhitespace() }
+}
+
+fun isValidPhone(phone: String): Boolean {
+    val digitsOnly = phone.filter { it.isDigit() }
+    return digitsOnly.length == 11
+}
+
+fun isValidAddress(address: String): Boolean {
+    return address.isNotEmpty() && address.length >= 5
 }
 
 @Composable
@@ -70,24 +72,20 @@ fun ProfileScreen(
     onFabClick: () -> Unit = {},
     onTabSelected: (Int) -> Unit = {}
 ) {
-
-    var activeTab by remember { mutableIntStateOf(3) }
-
-    val tabs = remember {
-        listOf(
-            NavTab(R.drawable.home, "Home"),
-            NavTab(R.drawable.favorite, "Favorite"),
-            NavTab(R.drawable.orders, "Orders"),
-            NavTab(R.drawable.profile, "Profile")
-        )
-    }
-
     var isEditMode by remember { mutableStateOf(false) }
 
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
+
+    // Проверка валидности всех полей
+    val isFormValid = remember(firstName, lastName, address, phone) {
+        isValidName(firstName) &&
+                isValidName(lastName) &&
+                isValidAddress(address) &&
+                isValidPhone(phone)
+    }
 
     val context = LocalContext.current
     var avatarUri by remember { mutableStateOf<Uri?>(null) }
@@ -115,7 +113,6 @@ fun ProfileScreen(
                 pendingCameraUri = uri
                 takePictureLauncher.launch(uri)
             }
-            // если пользователь запретил — можно показать MessageDialog
         }
     )
 
@@ -126,6 +123,7 @@ fun ProfileScreen(
         address = p.address.orEmpty()
         phone = p.phone.orEmpty()
     }
+
     val fullName by remember(firstName, lastName) {
         mutableStateOf(
             listOf(firstName.trim(), lastName.trim())
@@ -138,8 +136,8 @@ fun ProfileScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .statusBarsPadding()
-            .background(Background)
+            .padding(top = 62.dp)
+            .background(CustomTheme.colors.background)
     ) {
         Column(
             modifier = Modifier
@@ -166,14 +164,25 @@ fun ProfileScreen(
                         .align(Alignment.CenterEnd)
                         .size(34.dp)
                         .clip(CircleShape)
-                        .background(Accent)
-                        .clickable { isEditMode = !isEditMode },
+                        .background(
+                            if (isEditMode && !isFormValid)
+                                CustomTheme.colors.accent.copy(alpha = 0.5f)
+                            else
+                                CustomTheme.colors.accent
+                        )
+                        .clickable(enabled = !isEditMode || isFormValid) {
+                            if (!isEditMode || isFormValid) {
+                                isEditMode = !isEditMode
+                            }
+                        },
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
                         painter = painterResource(id = R.drawable.edit),
                         contentDescription = "Edit",
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier
+                            .size(16.dp)
+                            .alpha(if (isEditMode && !isFormValid) 0.5f else 1f)
                     )
                 }
             }
@@ -183,12 +192,11 @@ fun ProfileScreen(
             // ===== Avatar =====
             val profile = (profileState as? ProfileState.Ready)?.profile
 
-            val avatarModel: Any = avatarUri ?: (profile?.photo ?: R.drawable.profile_avatar)
+            val avatarModel: Any = avatarUri ?: (profile?.photo ?: R.drawable.profile)
 
             AsyncImage(
                 model = avatarModel,
                 contentDescription = "Avatar",
-                onError = { err -> android.util.Log.e("AvatarUI", "Coil error", err.result.throwable) },
                 modifier = Modifier
                     .size(96.dp)
                     .align(Alignment.CenterHorizontally)
@@ -210,7 +218,7 @@ fun ProfileScreen(
             if (isEditMode) {
                 Spacer(Modifier.height(6.dp))
                 Text(
-                    text = stringResource(R.string.PhotoProfile),
+                    text = stringResource(R.string.Change_Profile_Picture),
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
@@ -224,25 +232,23 @@ fun ProfileScreen(
 
             Spacer(Modifier.height(14.dp))
 
-            // Barcode можешь оставить как было (или скрывать в edit)
-            // Здесь оставлю скрытым в edit, как в твоём предыдущем варианте:
             if (!isEditMode) {
                 Box(
                     modifier = Modifier
                         .padding(horizontal = 16.dp)
                         .fillMaxWidth()
-                        .height(56.dp)
+                        .height(65.dp)
                         .clip(RoundedCornerShape(14.dp))
                         .background(CustomTheme.colors.block),
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
-                        painter = painterResource(id = R.drawable.profile),
+                        painter = painterResource(id = R.drawable.shtrih),
                         contentDescription = "Barcode",
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 18.dp)
-                            .height(26.dp),
+                            .height(49.dp),
                         contentScale = ContentScale.FillWidth
                     )
                 }
@@ -251,80 +257,59 @@ fun ProfileScreen(
                 Spacer(Modifier.height(10.dp))
             }
 
-            EditableProfileField(stringResource(R.string.Name), firstName, isEditMode, isEditMode) { firstName = it }
+            EditableProfileField(
+                label = stringResource(R.string.Name),
+                value = firstName,
+                enabled = isEditMode,
+                fieldType = FieldType.FIRST_NAME,
+                onValueChange = { firstName = it }
+            )
             Spacer(Modifier.height(12.dp))
-            EditableProfileField(stringResource(R.string.Last_Name), lastName, isEditMode, isEditMode) { lastName = it }
+
+            EditableProfileField(
+                label = stringResource(R.string.Last_Name),
+                value = lastName,
+                enabled = isEditMode,
+                fieldType = FieldType.LAST_NAME,
+                onValueChange = { lastName = it }
+            )
             Spacer(Modifier.height(12.dp))
-            EditableProfileField(stringResource(R.string.Address), address, isEditMode, isEditMode) { address = it }
+
+            EditableProfileField(
+                label = stringResource(R.string.Address),
+                value = address,
+                enabled = isEditMode,
+                fieldType = FieldType.ADDRESS,
+                onValueChange = { address = it }
+            )
             Spacer(Modifier.height(12.dp))
-            EditableProfileField(stringResource(R.string.phone_number), phone, isEditMode, isEditMode) { phone = it }
+
+            EditableProfileField(
+                label = stringResource(R.string.phone_number),
+                value = phone,
+                enabled = isEditMode,
+                fieldType = FieldType.PHONE,
+                onValueChange = { phone = it }
+            )
 
             if (isEditMode) {
                 Spacer(Modifier.height(18.dp))
-                Box(
+                MainButton(
                     modifier = Modifier
                         .padding(horizontal = 16.dp)
                         .fillMaxWidth()
-                        .height(52.dp)
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(Accent)
-                        .clickable {
-                            vm.save(firstName, lastName, address, phone)
-                            isEditMode = false
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(stringResource(R.string.Save), fontSize = 14.sp, color = Color.White)
-                }
+                        .height(52.dp),
+                    enabled = isFormValid,
+                    onClick = {
+                        vm.save(firstName, lastName, address, phone)
+                        isEditMode = false
+                    },
+                    text = stringResource(R.string.save_Now)
+                )
             }
 
             Spacer(Modifier.height(24.dp))
         }
-    }
-}
-
-@Composable
-private fun EditableProfileField(
-    label: String,
-    value: String,
-    enabled: Boolean,
-    showCheck: Boolean,
-    onValueChange: (String) -> Unit
-) {
-    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-        Text(text = label, fontSize = 14.sp, color = Color.Black)
-        Spacer(Modifier.height(8.dp))
-
-        OutlinedTextField(
-            value = value,
-            onValueChange = onValueChange,
-            enabled = enabled,
-            singleLine = true,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(54.dp),
-            shape = RoundedCornerShape(14.dp),
-            trailingIcon = {
-                if (showCheck) {
-                    Image(
-                        painter = painterResource(id = R.drawable.check),
-                        contentDescription = "Ok",
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
-            },
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = CustomTheme.colors.block,
-                unfocusedContainerColor = CustomTheme.colors.block,
-                disabledContainerColor = CustomTheme.colors.block,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                disabledIndicatorColor = Color.Transparent,
-                focusedTextColor = Color.Black,
-                unfocusedTextColor = CustomTheme.colors.subTextDark,
-                disabledTextColor = CustomTheme.colors.subTextDark
-            )
-        )
     }
 }
 

@@ -12,10 +12,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -29,11 +31,10 @@ import androidx.compose.ui.Alignment.Companion.Start
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.shoestore.R
-import com.example.shoestore.data.model.SignInState
+import com.example.shoestore.data.model.SignUpRequest
 import com.example.shoestore.data.model.SignUpState
 import com.example.shoestore.ui.theme.CustomTheme
 import com.example.shoestore.ui.theme.components.EmailTextBox
@@ -45,10 +46,13 @@ import com.example.shoestore.ui.theme.components.PasswordTextBox
 import com.example.shoestore.ui.theme.viewModel.SignUpViewModel
 
 @Composable
-fun RegistrationScreen(modifier: Modifier = Modifier,
-                       onSignInClick: () -> Unit,
-                       onBackClick: () -> Unit,
-                       viewModel: SignUpViewModel = androidx.lifecycle.viewmodel.compose.viewModel()){
+fun RegistrationScreen(
+    modifier: Modifier = Modifier,
+    onSignInClick: () -> Unit,
+    onBackClick: () -> Unit,
+    onRegisterSuccess: (String) -> Unit, // Новый колбэк для перехода на OTP
+    viewModel: SignUpViewModel = viewModel()
+) {
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -56,28 +60,35 @@ fun RegistrationScreen(modifier: Modifier = Modifier,
 
     val signUpState by viewModel.signUpState.collectAsState()
 
+    // Слушаем изменения состояния регистрации
     LaunchedEffect(signUpState) {
         if (signUpState is SignUpState.Success) {
-            onSignInClick()
             viewModel.resetState()
+            // При успехе переходим на экран OTP, передавая email
+            onRegisterSuccess(email)
         }
     }
 
+    // Отображение ошибки
     if (signUpState is SignUpState.Error) {
-        androidx.compose.material3.AlertDialog(
+        AlertDialog(
             onDismissRequest = { viewModel.resetState() },
             title = { Text(text = "Error") },
             text = { Text(text = (signUpState as SignUpState.Error).message) },
             confirmButton = {
-                androidx.compose.material3.TextButton(
+                TextButton(
                     onClick = { viewModel.resetState() }
                 ) {
                     Text("OK")
                 }
-            }
+            },
+            containerColor = CustomTheme.colors.block,
+            titleContentColor = CustomTheme.colors.text,
+            textContentColor = CustomTheme.colors.text
         )
     }
 
+    // Индикатор загрузки
     if (signUpState is SignUpState.Loading) {
         Box(
             modifier = Modifier
@@ -89,83 +100,117 @@ fun RegistrationScreen(modifier: Modifier = Modifier,
             CircularProgressIndicator(color = CustomTheme.colors.accent)
         }
     }
-    Column(modifier = modifier
-        .background(CustomTheme.colors.block)
-        .padding(start = 20.dp, top = 23.dp, end = 20.dp, bottom = 47.dp),
-        horizontalAlignment = Alignment.CenterHorizontally){
+
+    Column(
+        modifier = modifier
+            .background(CustomTheme.colors.block)
+            .padding(start = 20.dp, top = 23.dp, end = 20.dp, bottom = 47.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         IconButtonBack(
             onClick = { onBackClick() },
             modifier = Modifier.align(Start)
         )
+
         Spacer(modifier = Modifier.height(11.dp))
-        Text(style = CustomTheme.typography.HeadingRegular32,
-             text = stringResource(R.string.Register_Account),
+        Text(
+            style = CustomTheme.typography.HeadingRegular32,
+            text = stringResource(R.string.Register_Account),
             color = CustomTheme.colors.text
         )
+
         Spacer(modifier = Modifier.height(8.dp))
-        Text(style = CustomTheme.typography.BodyRegular16,
+        Text(
+            style = CustomTheme.typography.BodyRegular16,
             text = stringResource(R.string.Fill_your_details),
             color = CustomTheme.colors.hint
         )
+
         Spacer(modifier = Modifier.height(54.dp))
-        Card(modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(
-                containerColor = CustomTheme.colors.block
-            ),
-            shape = RoundedCornerShape(0.dp)) {
-            Text(style = CustomTheme.typography.BodyRegular20,
-                text = stringResource(R.string.Your_Name),
-                color = CustomTheme.colors.text
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            MainTextBox(modifier = Modifier.fillMaxWidth(),
-                        value = name,
-                        onValueChange = {name = it},
-                        placeholder = "xxxxxxxx"
-            )
-        }
-        Spacer(modifier = Modifier.height(12.dp))
-        Card(modifier = Modifier.fillMaxWidth(),
+
+        // Поле ввода имени
+        Card(
+            modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
                 containerColor = CustomTheme.colors.block
             ),
             shape = RoundedCornerShape(0.dp)
         ) {
-            Text(style = CustomTheme.typography.BodyRegular20,
-                text = stringResource(R.string.Email_Address),
+            Text(
+                style = CustomTheme.typography.BodyRegular20,
+                text = stringResource(R.string.Your_Name),
                 color = CustomTheme.colors.text
             )
+
             Spacer(modifier = Modifier.height(12.dp))
-            EmailTextBox(modifier = Modifier.fillMaxWidth(),
-                value = email,
-                onValueChange = {email = it},
-                placeholder = "xyz@gmail.com"
+            MainTextBox(
+                modifier = Modifier.fillMaxWidth(),
+                value = name,
+                onValueChange = { name = it },
+                placeholder = "xxxxxxxx"
             )
         }
+
         Spacer(modifier = Modifier.height(12.dp))
-        Card(modifier = Modifier.fillMaxWidth(),
+
+        // Поле ввода Email
+        Card(
+            modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
                 containerColor = CustomTheme.colors.block
             ),
-            shape = RoundedCornerShape(0.dp)) {
-            Text(style = CustomTheme.typography.BodyRegular20,
+            shape = RoundedCornerShape(0.dp)
+        ) {
+            Text(
+                style = CustomTheme.typography.BodyRegular20,
+                text = stringResource(R.string.Email_Address),
+                color = CustomTheme.colors.text
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+            EmailTextBox(
+                modifier = Modifier.fillMaxWidth(),
+                value = email,
+                onValueChange = { email = it },
+                placeholder = "xyz@gmail.com"
+            )
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // Поле ввода пароля
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = CustomTheme.colors.block
+            ),
+            shape = RoundedCornerShape(0.dp)
+        ) {
+            Text(
+                style = CustomTheme.typography.BodyRegular20,
                 text = stringResource(R.string.Password),
                 color = CustomTheme.colors.text
             )
+
             Spacer(modifier = Modifier.height(12.dp))
-            PasswordTextBox(modifier = Modifier.fillMaxWidth(),
+            PasswordTextBox(
+                modifier = Modifier.fillMaxWidth(),
                 value = password,
-                onValueChange = {password = it},
+                onValueChange = { password = it },
                 placeholder = "• • • • • • • •"
             )
         }
+
         Spacer(modifier = Modifier.height(12.dp))
-        Row(modifier = Modifier.height(38.dp)){
+
+        // Согласие с обработкой данных
+        Row(modifier = Modifier.height(38.dp)) {
             IconButtonPersonalData(
                 modifier = Modifier,
                 enabled = personalData,
                 onClick = { personalData = !personalData }
             )
+
             Spacer(modifier = Modifier.width(12.dp))
             Text(
                 text = stringResource(R.string.personal_data),
@@ -173,39 +218,50 @@ fun RegistrationScreen(modifier: Modifier = Modifier,
                 color = CustomTheme.colors.text
             )
         }
+
         Spacer(modifier = Modifier.height(24.dp))
-        MainButton(modifier = Modifier
-            .fillMaxWidth()
-            .height(50.dp),
-                   enabled = personalData && email.matches(Regex("^[a-z0-9]+@[a-z0-9]+\\.[a-z0-9]{2,3}$"))
-                           && signUpState !is SignUpState.Loading,
-                   text = stringResource(R.string.Sign_up),
-                   onClick = { viewModel.signUp(
-                       com.example.shoestore.data.model.SignUpRequest(
-                           email = email,
-                           password = password
-                       )
-                   ) })
+
+        // Кнопка регистрации
+        MainButton(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp),
+            // Простейшая валидация email через регулярное выражение из вашего исходного файла
+            enabled = personalData &&
+                    email.matches(Regex("^[a-zA-Z0-9._-]+@[a-z0-9.-]+\\.[a-z]{2,}$")) &&
+                    signUpState !is SignUpState.Loading,
+            text = stringResource(R.string.Sign_up),
+            onClick = {
+                viewModel.signUp(
+                    SignUpRequest(
+                        email = email,
+                        password = password
+                    )
+                )
+            }
+        )
+
         Spacer(modifier = Modifier.weight(1f))
 
-        Row(modifier = Modifier.clickable(onClick = {onSignInClick()})){
-            Text(style = CustomTheme.typography.BodyRegular16,
+        // Переход на экран входа
+        Row(modifier = Modifier.clickable(onClick = { onSignInClick() })) {
+            Text(
+                style = CustomTheme.typography.BodyRegular16,
                 text = stringResource(R.string.Already_Have_Account),
                 color = CustomTheme.colors.hint
             )
-            Text(style = CustomTheme.typography.BodyRegular16,
+
+            Text(
+                style = CustomTheme.typography.BodyRegular16,
                 text = " ",
                 color = CustomTheme.colors.hint
             )
-            Text(style = CustomTheme.typography.BodyRegular16,
+
+            Text(
+                style = CustomTheme.typography.BodyRegular16,
                 text = stringResource(R.string.Sign_In),
                 color = CustomTheme.colors.text
             )
         }
     }
-}
-
-@Preview
-@Composable
-private fun Prew() {
 }

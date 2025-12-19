@@ -7,30 +7,26 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
 import com.example.shoestore.data.nav.NavigationScreen
-import com.example.shoestore.ui.theme.CustomTheme
 import com.example.shoestore.ui.theme.ShoeStoreTheme
-import com.example.shoestore.ui.theme.view.Verification
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        enableEdgeToEdge() // Включает режим от края до края
         setContent {
             val navController = rememberNavController()
             ShoeStoreTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                // Scaffold предоставляет отступы (innerPadding) для учета системных баров
+                Scaffold(modifier = Modifier.fillMaxSize()) {
                     NavigationScreen(
                         navController = navController,
-                        modifier = Modifier.padding(innerPadding) // Pass the padding here
+                        // Важно: передаем отступы в NavigationScreen, чтобы контент не перекрывался системными панелями
+                        modifier = Modifier
                     )
                 }
-
             }
         }
     }

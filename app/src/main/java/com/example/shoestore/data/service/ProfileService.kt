@@ -14,8 +14,7 @@ import retrofit2.http.POST
 import retrofit2.http.Query
 
 interface ProfileService {
-    // GET /rest/v1/profiles?user_id=eq.<uuid>&select=*
-    @GET("rest/v1/profiles")
+    @GET("/rest/v1/profile")
     suspend fun getProfileByUserId(
         @Header("apikey") apiKey: String,
         @Header("Authorization") bearer: String,
@@ -23,28 +22,23 @@ interface ProfileService {
         @Query("select") select: String = "*"
     ): Response<List<ProfileDto>>
 
-    // PATCH /rest/v1/profiles?user_id=eq.<uuid>
-    @PATCH("rest/v1/profiles")
+    @POST("/rest/v1/profile")
+    @Headers("Prefer: return=representation")
+    suspend fun createProfile(
+        @Header("apikey") apiKey: String,
+        @Header("Authorization") bearer: String,
+        @Body body: ProfileUpsertDto
+    ): Response<List<ProfileDto>>
+
+    @PATCH("/rest/v1/profile")
     @Headers(
-        "Content-Type: application/json",
-        "Prefer: return=representation"
+        "Prefer: return=representation",
+        "Content-Type: application/json"
     )
     suspend fun updateProfileByUserId(
         @Header("apikey") apiKey: String,
         @Header("Authorization") bearer: String,
         @Query("user_id") userIdEq: String,
         @Body body: ProfileUpdateDto
-    ): Response<List<ProfileDto>>
-
-    // POST /rest/v1/profiles  (создать строку, если её нет)
-    @POST("rest/v1/profiles")
-    @Headers(
-        "Content-Type: application/json",
-        "Prefer: return=representation"
-    )
-    suspend fun createProfile(
-        @Header("apikey") apiKey: String,
-        @Header("Authorization") bearer: String,
-        @Body body: ProfileUpsertDto
     ): Response<List<ProfileDto>>
 }

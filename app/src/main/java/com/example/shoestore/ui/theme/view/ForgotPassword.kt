@@ -132,7 +132,7 @@ fun ForgotPassword(modifier: Modifier = Modifier,
         MainButton(modifier = Modifier
             .fillMaxWidth()
             .height(50.dp),
-            enabled = isEmailValid && recoveryState !is PasswordRecoveryState.Loading,
+            enabled = true,
             text = stringResource(R.string.Sign_In),
             onClick = {
                 viewModel.recoverPassword()

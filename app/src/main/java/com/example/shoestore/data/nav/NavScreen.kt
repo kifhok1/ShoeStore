@@ -10,6 +10,7 @@ import androidx.compose.ui.input.key.Key.Companion.Home
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.shoestore.data.model.OtpType
 import com.example.shoestore.ui.theme.CustomTheme
 import com.example.shoestore.ui.theme.view.CreateNewPassword
 import com.example.shoestore.ui.theme.view.ForgotPassword
@@ -45,11 +46,14 @@ fun NavigationScreen(
         }
 
         composable("register") {
-            Log.d("Navigation", "=== Показываем RegistrationScreen ===")
             RegistrationScreen(
                 modifier = Modifier.fillMaxSize().background(color = CustomTheme.colors.block),
                 onBackClick = { navController.popBackStack() },
-                onSignInClick = { navController.navigate("sign_in") }
+                onSignInClick = { navController.navigate("sign_in") },
+                // При успехе регистрации идем на OTP с типом EMAIL
+                onRegisterSuccess = { email ->
+                    navController.navigate("otp_verification/$email/EMAIL")
+                }
             )
         }
 
@@ -66,18 +70,23 @@ fun NavigationScreen(
             ForgotPassword(
                 modifier = Modifier.fillMaxSize().background(color = CustomTheme.colors.block),
                 onBackClick = { navController.popBackStack() },
+                // При восстановлении идем на OTP с типом RECOVERY
                 onOTPClick = { email ->
-                    navController.navigate("otp_verification/$email")
+                    navController.navigate("otp_verification/$email/RECOVERY")
                 }
             )
         }
 
-        composable("otp_verification/{email}") { backStackEntry ->
+        // Экран верификации принимает email и тип
+        composable("otp_verification/{email}/{type}") { backStackEntry ->
             val email = backStackEntry.arguments?.getString("email") ?: ""
+            val typeStr = backStackEntry.arguments?.getString("type") ?: "EMAIL"
+            val otpType = if (typeStr == "RECOVERY") OtpType.RECOVERY else OtpType.EMAIL
 
             Verification(
                 modifier = Modifier.fillMaxSize().background(color = CustomTheme.colors.block),
                 email = email,
+                otpType = otpType,
                 onBackClick = { navController.popBackStack() },
                 onSuccess = {
                     navController.navigate("create_new_password/$email")
@@ -102,4 +111,3 @@ fun NavigationScreen(
         }
     }
 }
-

@@ -7,8 +7,10 @@ import com.example.shoestore.data.RetrofitInstance
 import com.example.shoestore.data.model.ChangePasswordRequest
 import com.example.shoestore.data.model.ChangePasswordState
 import com.example.shoestore.data.model.SignInRequest
+import com.example.shoestore.data.model.SignInResponse
 import com.example.shoestore.data.model.SignInState
 import com.example.shoestore.data.model.User
+import com.google.gson.Gson
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,7 +19,8 @@ import kotlinx.coroutines.launch
 class SignInViewModel : ViewModel() {
     private val _signInState = MutableStateFlow<SignInState>(SignInState.Idle)
     val signInState: StateFlow<SignInState> = _signInState
-    val _changePasswordState = MutableStateFlow<ChangePasswordState>(ChangePasswordState.Idle)
+
+    private val _changePasswordState = MutableStateFlow<ChangePasswordState>(ChangePasswordState.Idle)
     val changePasswordState: StateFlow<ChangePasswordState> = _changePasswordState.asStateFlow()
 
     fun signIn(email: String, password: String) {
@@ -29,14 +32,34 @@ class SignInViewModel : ViewModel() {
                 )
 
                 if (response.isSuccessful) {
-                    response.body()?.let { signInResponse ->
-                        // Сохраняем токен
+                    val body = response.body()
+
+                    // ИСПРАВЛЕНИЕ: Приводим Any к SignInResponse
+                    // Если вы используете GsonConverterFactory, Retrofit может вернуть LinkedTreeMap вместо объекта
+                    // Поэтому надежнее спарсить через Gson, если тип в Service указан как Any
+
+                    val signInResponse: SignInResponse? = if (body is SignInResponse) {
+                        body
+                    } else {
+                        // Если Retrofit вернул LinkedTreeMap (частая проблема при Response<Any>)
+                        try {
+                            val gson = Gson()
+                            val json = gson.toJson(body)
+                            gson.fromJson(json, SignInResponse::class.java)
+                        } catch (e: Exception) {
+                            null
+                        }
+                    }
+
+                    if (signInResponse != null) {
                         saveAuthToken(signInResponse.access_token)
                         saveRefreshToken(signInResponse.refresh_token)
                         saveUserData(signInResponse.user)
 
                         Log.v("signIn", "User authenticated: ${signInResponse.user.email}")
                         _signInState.value = SignInState.Success
+                    } else {
+                        _signInState.value = SignInState.Error("Failed to parse response")
                     }
                 } else {
                     val errorMessage = parseSignInError(response.code(), response.message())
@@ -55,6 +78,7 @@ class SignInViewModel : ViewModel() {
             }
         }
     }
+
     fun changePassword(token: String, newPassword: String) {
         viewModelScope.launch {
             _changePasswordState.value = ChangePasswordState.Loading
@@ -79,6 +103,7 @@ class SignInViewModel : ViewModel() {
     fun resetChangePasswordState() {
         _changePasswordState.value = ChangePasswordState.Idle
     }
+
     private fun parseSignInError(code: Int, message: String): String {
         return when (code) {
             400 -> "Invalid email or password"

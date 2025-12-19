@@ -2,13 +2,15 @@ package com.example.shoestore.ui.theme.viewModel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.launch
 import com.example.shoestore.data.RetrofitInstance
 import com.example.shoestore.data.model.SignUpRequest
+import com.example.shoestore.data.model.SignUpResponse // Убедитесь, что импортирован этот класс
 import com.example.shoestore.data.model.SignUpState
+import com.google.gson.Gson
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 class SignUpViewModel: ViewModel() {
     private val _signUpState = MutableStateFlow<SignUpState>(SignUpState.Idle)
@@ -16,14 +18,32 @@ class SignUpViewModel: ViewModel() {
 
     fun signUp(signUpRequest: SignUpRequest) {
         viewModelScope.launch {
-            _signUpState.value = SignUpState.Loading // 1. Включаем индикацию загрузки
+            _signUpState.value = SignUpState.Loading
             try {
                 val response = RetrofitInstance.userManagementService.signUp(signUpRequest)
+
                 if (response.isSuccessful) {
-                    response.body()?.let {
-                        Log.v("signUp", "User id: ${it.id}")
+                    val body = response.body()
+
+                    // ИСПРАВЛЕНИЕ: Преобразуем Any в SignUpResponse
+                    val signUpResponse: SignUpResponse? = try {
+                        val gson = Gson()
+                        val json = gson.toJson(body)
+                        gson.fromJson(json, SignUpResponse::class.java)
+                    } catch (e: Exception) {
+                        null
+                    }
+
+                    if (signUpResponse != null) {
+                        // Теперь поле id доступно, так как компилятор знает тип
+                        Log.v("signUp", "User id: ${signUpResponse.id}")
+                        _signUpState.value = SignUpState.Success
+                    } else {
+                        // Если распарсить не удалось, но сервер вернул 200 OK, все равно считаем успехом
+                        Log.v("signUp", "Registration successful (response parsing skipped)")
                         _signUpState.value = SignUpState.Success
                     }
+
                 } else {
                     val errorMessage = when (response.code()) {
                         400 -> "Invalid email or password"
@@ -45,7 +65,6 @@ class SignUpViewModel: ViewModel() {
         }
     }
 
-    // Метод для сброса ошибки, чтобы закрыть диалог и вернуть UI в исходное состояние
     fun resetState() {
         _signUpState.value = SignUpState.Idle
     }

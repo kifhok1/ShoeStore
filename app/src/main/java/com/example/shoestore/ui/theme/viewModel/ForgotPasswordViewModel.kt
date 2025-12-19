@@ -13,6 +13,7 @@ import java.net.ConnectException
 import java.net.SocketTimeoutException
 
 class ForgotPasswordViewModel: ViewModel() {
+
     private val _passwordRecoveryState = MutableStateFlow<PasswordRecoveryState>(PasswordRecoveryState.Idle)
     val passwordRecoveryState: StateFlow<PasswordRecoveryState> = _passwordRecoveryState
 
@@ -40,7 +41,6 @@ class ForgotPasswordViewModel: ViewModel() {
 
         viewModelScope.launch {
             _passwordRecoveryState.value = PasswordRecoveryState.Loading
-
             try {
                 Log.d("ForgotPasswordViewModel", "Sending recovery request for email: ${_email.value}")
 
@@ -51,44 +51,28 @@ class ForgotPasswordViewModel: ViewModel() {
 
                 // Отправляем запрос через Retrofit
                 val response = RetrofitInstance.userManagementService.recoverPassword(request)
-
                 Log.d("ForgotPasswordViewModel", "Response received: ${response.isSuccessful}")
 
                 if (response.isSuccessful) {
-                    // Supabase возвращает 200 OK даже если email не найден
-                    response.body()?.let { recoveryResponse ->
-                        Log.d("ForgotPasswordViewModel", "Recovery response: $recoveryResponse")
+                    // Supabase возвращает 200 OK, если письмо отправлено (или просто запрос принят)
+                    // Удалена проверка response.body()?.error, так как этого поля нет в модели
 
-                        // Supabase может возвращать сообщение об успехе или ошибку в теле ответа
-                        if (recoveryResponse.error != null) {
-                            // Есть ошибка в теле ответа
-                            _passwordRecoveryState.value = PasswordRecoveryState.Error(
-                                parseRecoveryError(recoveryResponse.error)
-                            )
-                        } else {
-                            // Успешный ответ
-                            _passwordRecoveryState.value = PasswordRecoveryState.Success(
-                                "Password reset email has been sent to ${_email.value}"
-                            )
-                        }
-                    } ?: run {
-                        // Пустое тело ответа
-                        _passwordRecoveryState.value = PasswordRecoveryState.Success(
-                            "Password reset email has been sent to ${_email.value}"
-                        )
-                    }
+                    _passwordRecoveryState.value = PasswordRecoveryState.Success(
+                        "Password reset email has been sent to ${_email.value}"
+                    )
+
                 } else {
-                    // Ошибка HTTP
+                    // Ошибка HTTP (например, 400, 429)
                     val errorCode = response.code()
                     val errorMessage = response.message()
                     val errorBody = response.errorBody()?.string() ?: ""
-
                     Log.e("ForgotPasswordViewModel", "Error: $errorCode - $errorMessage - $errorBody")
 
                     _passwordRecoveryState.value = PasswordRecoveryState.Error(
                         parseRecoveryError(errorCode, errorMessage, errorBody)
                     )
                 }
+
             } catch (e: Exception) {
                 // Обработка исключений
                 val errorMessage = when (e) {
@@ -125,6 +109,7 @@ class ForgotPasswordViewModel: ViewModel() {
         }
     }
 
+    // Этот метод больше не используется, но оставлен для совместимости если вы решите парсить тело ошибки вручную
     private fun parseRecoveryError(errorBody: String): String {
         return when {
             errorBody.contains("user not found", ignoreCase = true) ->

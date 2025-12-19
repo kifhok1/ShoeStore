@@ -1,36 +1,38 @@
+// data/AuthStore.kt
 package com.example.shoestore.data
 
 import android.content.Context
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
-private val Context.ds by preferencesDataStore("auth_store")
+import android.content.SharedPreferences
 
+class AuthStore(context: Context) {
 
-class AuthStore(private val context: Context) {
-    private val ACCESS_TOKEN = stringPreferencesKey("access_token")
-    private val REFRESH_TOKEN = stringPreferencesKey("refresh_token")
-    private val USER_ID = stringPreferencesKey("user_id")
+    private val prefs: SharedPreferences = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
 
-    val accessToken: Flow<String?> = context.ds.data.map { it[ACCESS_TOKEN] }
-    val refreshToken: Flow<String?> = context.ds.data.map { it[REFRESH_TOKEN] }
-    val userId: Flow<String?> = context.ds.data.map { it[USER_ID] }
-
-    suspend fun saveAccessToken(token: String) {
-        context.ds.edit { it[ACCESS_TOKEN] = token }
+    companion object {
+        private const val KEY_ACCESS_TOKEN = "access_token"
+        private const val KEY_USER_ID = "user_id"
     }
 
-    suspend fun saveRefreshToken(token: String) {
-        context.ds.edit { it[REFRESH_TOKEN] = token }
+    // Сохранение данных
+    fun saveToken(token: String, userId: String) {
+        prefs.edit()
+            .putString(KEY_ACCESS_TOKEN, token)
+            .putString(KEY_USER_ID, userId)
+            .apply() // apply сохраняет асинхронно, не блокируя UI
     }
 
-    suspend fun saveUserId(userId: String) {
-        context.ds.edit { it[USER_ID] = userId }
+    // Получение токена (синхронно)
+    fun getToken(): String? {
+        return prefs.getString(KEY_ACCESS_TOKEN, null)
     }
 
-    suspend fun clear() {
-        context.ds.edit { it.clear() }
+    // Получение ID (синхронно)
+    fun getUserId(): String? {
+        return prefs.getString(KEY_USER_ID, null)
+    }
+
+    // Очистка данных (выход)
+    fun clear() {
+        prefs.edit().clear().apply()
     }
 }

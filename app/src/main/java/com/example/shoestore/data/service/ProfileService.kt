@@ -14,7 +14,7 @@ import retrofit2.http.POST
 import retrofit2.http.Query
 
 interface ProfileService {
-    @GET("/rest/v1/profile")
+    @GET("/rest/v1/profiles")
     suspend fun getProfileByUserId(
         @Header("apikey") apiKey: String,
         @Header("Authorization") bearer: String,
@@ -22,7 +22,7 @@ interface ProfileService {
         @Query("select") select: String = "*"
     ): Response<List<ProfileDto>>
 
-    @POST("/rest/v1/profile")
+    @POST("/rest/v1/profiles")
     @Headers("Prefer: return=representation")
     suspend fun createProfile(
         @Header("apikey") apiKey: String,
@@ -30,7 +30,7 @@ interface ProfileService {
         @Body body: ProfileUpsertDto
     ): Response<List<ProfileDto>>
 
-    @PATCH("/rest/v1/profile")
+    @PATCH("/rest/v1/profiles")
     @Headers(
         "Prefer: return=representation",
         "Content-Type: application/json"

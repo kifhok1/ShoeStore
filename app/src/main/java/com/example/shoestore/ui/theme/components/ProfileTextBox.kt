@@ -73,7 +73,7 @@ fun EditableProfileField(
     val checkColor = if (isValid) CustomTheme.colors.accent else CustomTheme.colors.red
 
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-        Text(text = label, fontSize = 14.sp, color = Color.Black)
+        Text(text = label, style = CustomTheme.typography.BodyRegular20, color = CustomTheme.colors.text)
         Spacer(Modifier.height(8.dp))
 
         OutlinedTextField(
@@ -123,6 +123,7 @@ fun EditableProfileField(
                     )
                 }
             },
+            textStyle = CustomTheme.typography.BodyRegular14,
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = CustomTheme.colors.block,
                 unfocusedContainerColor = CustomTheme.colors.block,

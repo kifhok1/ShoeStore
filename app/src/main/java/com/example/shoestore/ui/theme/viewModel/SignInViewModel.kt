@@ -1,22 +1,28 @@
+// ui/theme/viewModel/SignInViewModel.kt
 package com.example.shoestore.ui.theme.viewModel
 
+import android.app.Application
 import android.util.Log
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.shoestore.data.AuthStore
 import com.example.shoestore.data.RetrofitInstance
 import com.example.shoestore.data.model.ChangePasswordRequest
 import com.example.shoestore.data.model.ChangePasswordState
 import com.example.shoestore.data.model.SignInRequest
 import com.example.shoestore.data.model.SignInResponse
 import com.example.shoestore.data.model.SignInState
-import com.example.shoestore.data.model.User
 import com.google.gson.Gson
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class SignInViewModel : ViewModel() {
+class SignInViewModel(application: Application) : AndroidViewModel(application) {
+
+    // Инициализируем AuthStore с контекстом приложения
+    private val authStore = AuthStore(application)
+
     private val _signInState = MutableStateFlow<SignInState>(SignInState.Idle)
     val signInState: StateFlow<SignInState> = _signInState
 
@@ -34,14 +40,9 @@ class SignInViewModel : ViewModel() {
                 if (response.isSuccessful) {
                     val body = response.body()
 
-                    // ИСПРАВЛЕНИЕ: Приводим Any к SignInResponse
-                    // Если вы используете GsonConverterFactory, Retrofit может вернуть LinkedTreeMap вместо объекта
-                    // Поэтому надежнее спарсить через Gson, если тип в Service указан как Any
-
                     val signInResponse: SignInResponse? = if (body is SignInResponse) {
                         body
                     } else {
-                        // Если Retrofit вернул LinkedTreeMap (частая проблема при Response<Any>)
                         try {
                             val gson = Gson()
                             val json = gson.toJson(body)
@@ -52,11 +53,10 @@ class SignInViewModel : ViewModel() {
                     }
 
                     if (signInResponse != null) {
-                        saveAuthToken(signInResponse.access_token)
-                        saveRefreshToken(signInResponse.refresh_token)
-                        saveUserData(signInResponse.user)
+                        // === СОХРАНЕНИЕ В SHAREDPREFERENCES ===
+                        Log.d("SignInViewModel", "Saving token to SharedPreferences")
+                        authStore.saveToken(signInResponse.access_token, signInResponse.user.id)
 
-                        Log.v("signIn", "User authenticated: ${signInResponse.user.email}")
                         _signInState.value = SignInState.Success
                     } else {
                         _signInState.value = SignInState.Error("Failed to parse response")
@@ -64,17 +64,13 @@ class SignInViewModel : ViewModel() {
                 } else {
                     val errorMessage = parseSignInError(response.code(), response.message())
                     _signInState.value = SignInState.Error(errorMessage)
-                    Log.e("signIn", "Error code: ${response.code()}, message: ${response.message()}, body: ${response.errorBody()?.string()}")
                 }
             } catch (e: Exception) {
                 val errorMessage = when (e) {
                     is java.net.ConnectException -> "No internet connection"
-                    is java.net.SocketTimeoutException -> "Connection timeout"
-                    is javax.net.ssl.SSLHandshakeException -> "Security error"
                     else -> "Authentication failed: ${e.message}"
                 }
                 _signInState.value = SignInState.Error(errorMessage)
-                Log.e("SignInViewModel", "Exception: ${e.message}", e)
             }
         }
     }
@@ -92,7 +88,7 @@ class SignInViewModel : ViewModel() {
                     _changePasswordState.value = ChangePasswordState.Success
                 } else {
                     val errorMessage = response.errorBody()?.string() ?: "Unknown error"
-                    _changePasswordState.value = ChangePasswordState.Error("Failed to change password: $errorMessage")
+                    _changePasswordState.value = ChangePasswordState.Error("Failed: $errorMessage")
                 }
             } catch (e: Exception) {
                 _changePasswordState.value = ChangePasswordState.Error("Network error: ${e.message}")
@@ -108,23 +104,8 @@ class SignInViewModel : ViewModel() {
         return when (code) {
             400 -> "Invalid email or password"
             401 -> "Invalid login credentials"
-            422 -> "Invalid email format"
-            429 -> "Too many login attempts. Please try again later."
-            500 -> "Server error. Please try again later."
             else -> "Login failed: $message"
         }
-    }
-
-    private fun saveAuthToken(token: String) {
-        Log.d("Auth", "Access token saved: ${token.take(10)}...")
-    }
-
-    private fun saveRefreshToken(token: String) {
-        Log.d("Auth", "Refresh token saved: ${token.take(10)}...")
-    }
-
-    private fun saveUserData(user: User) {
-        Log.d("Auth", "User data saved: ${user.email}")
     }
 
     fun resetState() {

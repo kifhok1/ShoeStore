@@ -1,5 +1,6 @@
 package com.example.shoestore.data.model
 
 data class SignUpResponse(
-    val id: String
+    val id: String,
+    val access_token: String?
 )

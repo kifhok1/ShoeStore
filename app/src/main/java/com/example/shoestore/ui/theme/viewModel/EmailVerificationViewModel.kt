@@ -1,28 +1,33 @@
+// ui/theme/viewModel/EmailVerificationViewModel.kt
 package com.example.shoestore.ui.theme.viewModel
 
+import android.app.Application
 import android.util.Log
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.shoestore.data.AuthStore
 import com.example.shoestore.data.RetrofitInstance
 import com.example.shoestore.data.model.OtpType
-import com.example.shoestore.data.model.RecoveryState
+import com.example.shoestore.data.model.SignInResponse
 import com.example.shoestore.data.model.VerificationState
 import com.example.shoestore.data.model.VerifyOtpRequest
+import com.google.gson.Gson
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.net.ConnectException
-import java.net.SocketTimeoutException
 
-class EmailVerificationViewModel : ViewModel() {
+class EmailVerificationViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val authStore = AuthStore(application)
 
     private val _verificationState = MutableStateFlow<VerificationState>(VerificationState.Idle)
     val verificationState: StateFlow<VerificationState> = _verificationState
 
-    private val _recoveryState = MutableStateFlow<RecoveryState?>(null)
-    val recoveryState: StateFlow<RecoveryState?> = _recoveryState
+    private val _recoveryState = MutableStateFlow<Any?>(null)
+    val recoveryState: StateFlow<Any?> = _recoveryState
 
-    private val _resendState = MutableStateFlow<Boolean>(false)
+    private val _resendState = MutableStateFlow(false)
     val resendState: StateFlow<Boolean> = _resendState
 
     fun verifyOtp(email: String, otpCode: String, type: OtpType) {
@@ -33,17 +38,11 @@ class EmailVerificationViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val requestType = if (type == OtpType.RECOVERY) "recovery" else "signup"
-
-                // ИСПРАВЛЕНИЕ: Добавлен параметр token = "", так как VerifyOtpRequest требует его.
-                // Supabase при обработке запроса resend проигнорирует поле token.
                 val response = RetrofitInstance.userManagementService.resendOtp(
                     VerifyOtpRequest(email = email, token = "", type = requestType)
                 )
-
                 if (response.isSuccessful) {
                     Log.d("EmailVerificationVM", "Resend successful")
-                } else {
-                    Log.e("EmailVerificationVM", "Resend failed: ${response.code()}")
                 }
             } catch (e: Exception) {
                 Log.e("EmailVerificationVM", "Resend exception: ${e.message}")
@@ -55,49 +54,48 @@ class EmailVerificationViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 _verificationState.value = VerificationState.Loading
-
-                // Map local OtpType to Supabase API type string
                 val apiType = if (otpType == OtpType.RECOVERY) "recovery" else "signup"
 
                 val response = RetrofitInstance.userManagementService.verifyOtp(
-                    VerifyOtpRequest(
-                        email = email,
-                        token = otpCode,
-                        type = apiType
-                    )
+                    VerifyOtpRequest(email = email, token = otpCode, type = apiType)
                 )
 
                 if (response.isSuccessful) {
-                    response.body()?.let { responseBody ->
-                        _verificationState.value = VerificationState.Success(
-                            type = otpType,
-                            data = responseBody
-                        )
-                    } ?: run {
-                        // Even if body is empty, 200 OK means success usually
-                        _verificationState.value = VerificationState.Success(type = otpType, data = Any())
+                    val responseBody = response.body() ?: Any()
+
+                    try {
+                        val gson = Gson()
+                        val json = gson.toJson(responseBody)
+                        val session = gson.fromJson(json, SignInResponse::class.java)
+
+                        // === СОХРАНЕНИЕ В SHAREDPREFERENCES ===
+                        if (!session.access_token.isNullOrBlank() && !session.user.id.isNullOrBlank()) {
+                            Log.d("EmailVerificationVM", "Saving session to SharedPreferences")
+                            authStore.saveToken(session.access_token, session.user.id)
+                        }
+                    } catch (e: Exception) {
+                        // Игнорируем ошибки парсинга сессии
                     }
+
+                    _verificationState.value = VerificationState.Success(
+                        type = otpType,
+                        data = responseBody
+                    )
                 } else {
-                    val errorMessage = parseVerificationError(response.code(), response.message(), otpType)
+                    val errorMessage = parseVerificationError(response.code(), response.message())
                     _verificationState.value = VerificationState.Error(errorMessage)
                 }
             } catch (e: Exception) {
-                val errorMessage = when (e) {
-                    is ConnectException -> "No internet connection"
-                    is SocketTimeoutException -> "Connection timeout"
-                    else -> "Verification failed: ${e.message}"
-                }
+                val errorMessage = if (e is ConnectException) "No internet connection" else e.message ?: "Error"
                 _verificationState.value = VerificationState.Error(errorMessage)
             }
         }
     }
 
-    private fun parseVerificationError(code: Int, message: String, otpType: OtpType): String {
+    private fun parseVerificationError(code: Int, message: String): String {
         return when (code) {
             400 -> "Invalid OTP code"
-            401 -> "OTP expired or invalid"
             404 -> "Email not found"
-            429 -> "Too many attempts. Please try again later."
             else -> "Verification failed: $message"
         }
     }

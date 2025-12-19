@@ -199,8 +199,7 @@ fun ProfileScreen(
                         Text(
                             text = stringResource(R.string.Profile),
                             modifier = Modifier.fillMaxWidth(),
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.Medium,
+                            style = CustomTheme.typography.HeadingSemiBold16,
                             textAlign = TextAlign.Center
                         )
 
@@ -256,9 +255,8 @@ fun ProfileScreen(
                         text = fullName,
                         modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.Center,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = Color.Black
+                        style = CustomTheme.typography.BodyRegular20,
+                        color = CustomTheme.colors.text
                     )
 
                     if (isEditMode) {
@@ -352,7 +350,7 @@ fun ProfileScreen(
                             enabled = isFormValid,
                             onClick = {
                                 if (isFormValid) {
-                                    vm.save(firstName, lastName, address, phone)
+                                    vm.saveProfile(firstName, lastName, address, phone)
                                     isEditMode = false
                                 }
                             },
@@ -363,33 +361,6 @@ fun ProfileScreen(
                     Spacer(Modifier.height(24.dp))
                 }
             }
-        }
-
-        // Overlay индикатор для состояния Saving
-        if (isSaving) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.White.copy(alpha = 0.3f))
-                    .clickable(enabled = false) {}, // Блокировка кликов
-                contentAlignment = Center
-            ) {
-                CircularProgressIndicator(color = CustomTheme.colors.accent)
-            }
-        }
-
-        // Snackbar для ошибок
-        SnackbarHost(
-            hostState = snackbarHostState,
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(16.dp)
-        ) { data ->
-            Snackbar(
-                snackbarData = data,
-                containerColor = CustomTheme.colors.accent,
-                contentColor = Color.White
-            )
         }
     }
 }

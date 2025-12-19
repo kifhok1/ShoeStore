@@ -1,18 +1,25 @@
+// ui/theme/viewModel/SignUpViewModel.kt
 package com.example.shoestore.ui.theme.viewModel
 
+import android.app.Application
 import android.util.Log
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.shoestore.data.AuthStore
 import com.example.shoestore.data.RetrofitInstance
+import com.example.shoestore.data.model.SignInResponse
 import com.example.shoestore.data.model.SignUpRequest
-import com.example.shoestore.data.model.SignUpResponse // Убедитесь, что импортирован этот класс
+import com.example.shoestore.data.model.SignUpResponse
 import com.example.shoestore.data.model.SignUpState
 import com.google.gson.Gson
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class SignUpViewModel: ViewModel() {
+class SignUpViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val authStore = AuthStore(application)
+
     private val _signUpState = MutableStateFlow<SignUpState>(SignUpState.Idle)
     val signUpState: StateFlow<SignUpState> = _signUpState
 
@@ -24,43 +31,41 @@ class SignUpViewModel: ViewModel() {
 
                 if (response.isSuccessful) {
                     val body = response.body()
+                    val gson = Gson()
 
-                    // ИСПРАВЛЕНИЕ: Преобразуем Any в SignUpResponse
-                    val signUpResponse: SignUpResponse? = try {
-                        val gson = Gson()
+                    // Попытка найти сессию для авто-логина
+                    try {
                         val json = gson.toJson(body)
-                        gson.fromJson(json, SignUpResponse::class.java)
+                        val session = gson.fromJson(json, SignInResponse::class.java)
+
+                        // === СОХРАНЕНИЕ В SHAREDPREFERENCES ===
+                        if (!session.access_token.isNullOrBlank() && !session.user.id.isNullOrBlank()) {
+                            Log.d("SignUpViewModel", "Auto-login: Saving to SharedPreferences")
+                            authStore.saveToken(session.access_token, session.user.id)
+                        }
                     } catch (e: Exception) {
-                        null
+                        // Токена нет
                     }
+
+                    // Попытка получить ID пользователя
+                    var signUpResponse: SignUpResponse? = null
+                    try {
+                        val json = gson.toJson(body)
+                        signUpResponse = gson.fromJson(json, SignUpResponse::class.java)
+                    } catch (e: Exception) { }
 
                     if (signUpResponse != null) {
-                        // Теперь поле id доступно, так как компилятор знает тип
-                        Log.v("signUp", "User id: ${signUpResponse.id}")
-                        _signUpState.value = SignUpState.Success
-                    } else {
-                        // Если распарсить не удалось, но сервер вернул 200 OK, все равно считаем успехом
-                        Log.v("signUp", "Registration successful (response parsing skipped)")
-                        _signUpState.value = SignUpState.Success
+                        Log.v("signUp", "User created: ${signUpResponse.id}")
                     }
 
+                    _signUpState.value = SignUpState.Success
+
                 } else {
-                    val errorMessage = when (response.code()) {
-                        400 -> "Invalid email or password"
-                        422 -> "Unable to validate email address: invalid format"
-                        429 -> "Too many requests"
-                        else -> "Registration failed: ${response.message()}"
-                    }
+                    val errorMessage = "Registration failed: ${response.message()}"
                     _signUpState.value = SignUpState.Error(errorMessage)
                 }
             } catch (e: Exception) {
-                val errorMessage = when (e) {
-                    is java.net.ConnectException -> "No internet connection"
-                    is java.net.SocketTimeoutException -> "Connection timeout"
-                    else -> "Network error: ${e.message}"
-                }
-                _signUpState.value = SignUpState.Error(errorMessage)
-                Log.e("SignUpViewModel", e.message.toString())
+                _signUpState.value = SignUpState.Error("Network error: ${e.message}")
             }
         }
     }

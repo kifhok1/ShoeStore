@@ -21,39 +21,32 @@ import com.example.shoestore.ui.theme.ShoeStoreTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge() // Включает режим от края до края
         enableEdgeToEdge()
 
         val preferencesManager = PreferencesManager(this)
         val isFirstLaunch = preferencesManager.isFirstLaunch()
 
-        // Сохраняем флаг после первого запуска
         if (isFirstLaunch) {
             preferencesManager.setFirstLaunchCompleted()
         }
 
-        // 1. Убираем рамки (делаем приложение на весь экран)
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
-        // 2. Прячем системные панели (Статус бар сверху и Навигацию снизу)
         val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
-        windowInsetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE // Появятся только если свайпнуть от края
-        windowInsetsController.hide(WindowInsetsCompat.Type.systemBars()) // Скрыть всё
+        windowInsetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
 
         setContent {
             val navController = rememberNavController()
             ShoeStoreTheme {
-                // Scaffold предоставляет отступы (innerPadding) для учета системных баров
-                Scaffold(modifier = Modifier.fillMaxSize()) {
+                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     NavigationScreen(
                         navController = navController,
-                        // Важно: передаем отступы в NavigationScreen, чтобы контент не перекрывался системными панелями
-                        modifier = Modifier,
+                        modifier = Modifier.padding(),
                         isFirstLaunch = isFirstLaunch
                     )
                 }
             }
-          }
         }
     }
 }

@@ -25,6 +25,7 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.shoestore.R
 import com.example.shoestore.ui.theme.CustomTheme
+import com.example.shoestore.ui.theme.SvgPathShape
 
 private const val MENU_SVG_PATH = "M121.7,20.5C66.8,21.7,17.7,7.3,0,0v106h375V0c-27,19.5-98.1,20-119.7,20c-21.5,0-25.5,3-25.5,11.5s4.6,31.7-22,35c-52.1,6.5-62.2-11-63.1-22C143.7,31.5,146.2,20.5,121.7,20.5z"
 
@@ -122,21 +123,5 @@ private fun MenuIcon(iconRes: Int, isSelected: Boolean, onClick: () -> Unit) {
         contentAlignment = Alignment.Center
     ) {
         Icon(painter = painterResource(id = iconRes), contentDescription = null, tint = tint, modifier = Modifier.size(24.dp))
-    }
-}
-
-// Парсер SVG в Shape
-class SvgPathShape(private val pathData: String) : Shape {
-    override fun createOutline(size: Size, layoutDirection: LayoutDirection, density: Density): Outline {
-        val path = try { PathParser.createPathFromPathData(pathData) } catch (e: Exception) { android.graphics.Path() }
-        val bounds = RectF(); path.computeBounds(bounds, true)
-        val matrix = Matrix()
-        var scaleX = 1f; var scaleY = 1f
-        if (bounds.width() > 0 && bounds.height() > 0) {
-            scaleX = size.width / bounds.width(); scaleY = size.height / bounds.height()
-        }
-        matrix.setScale(scaleX, scaleY)
-        path.transform(matrix)
-        return Outline.Generic(path.asComposePath())
     }
 }

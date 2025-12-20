@@ -1,6 +1,7 @@
 package com.example.shoestore.data.service
 
 import com.example.shoestore.data.model.FavouriteDto
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -12,12 +13,13 @@ interface FavouriteService {
     @Headers(
         "apikey: $API_KEY",
         "Authorization: Bearer $API_KEY",
-        "Content-Type: application/json"
+        "Content-Type: application/json",
+        "Prefer: return=minimal"
     )
     @POST("rest/v1/favourite")
     suspend fun addFavourite(
         @Body body: FavouriteDto
-    ): List<FavouriteDto>
+    ): Response<Unit>
 
     @Headers(
         "apikey: $API_KEY",
@@ -28,7 +30,7 @@ interface FavouriteService {
         // сюда уже передаём строку вида "eq.<uuid>"
         @Query("product_id") productIdEq: String,
         @Query("user_id") userIdEq: String
-    ): Unit
+    ): Response<Unit>
 
     @Headers(
         "apikey: $API_KEY",

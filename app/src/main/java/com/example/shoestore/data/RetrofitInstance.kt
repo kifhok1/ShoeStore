@@ -4,6 +4,7 @@ import StorageService
 import com.example.shoestore.data.service.CatalogService
 import com.example.shoestore.data.service.FavouriteService
 import com.example.shoestore.data.service.ProfileService
+import com.example.shoestore.data.service.SupabaseApi
 import com.example.shoestore.data.service.UserManagementService
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
@@ -17,9 +18,6 @@ object RetrofitInstance {
 
     // Настраиваем клиент с увеличенными таймаутами
     private val client: OkHttpClient = OkHttpClient.Builder()
-        .connectTimeout(120, TimeUnit.SECONDS) // 2 минуты на соединение
-        .readTimeout(120, TimeUnit.SECONDS)    // 2 минуты на чтение ответа
-        .writeTimeout(120, TimeUnit.SECONDS)   // 2 минуты на отправку файла
         .protocols(listOf(Protocol.HTTP_1_1))  // Принудительно HTTP/1.1 (стабильнее для файлов)
         .build()
 
@@ -45,6 +43,7 @@ object RetrofitInstance {
         retrofit.create(StorageService::class.java)
     }
 
-        val catalogService: CatalogService = retrofit.create(CatalogService::class.java)
-        val favouriteService: FavouriteService = retrofit.create(FavouriteService::class.java)
+    val catalogService: CatalogService = retrofit.create(CatalogService::class.java)
+    val favouriteService: FavouriteService = retrofit.create(FavouriteService::class.java)
+    val api: SupabaseApi = retrofit.create(SupabaseApi::class.java)
 }

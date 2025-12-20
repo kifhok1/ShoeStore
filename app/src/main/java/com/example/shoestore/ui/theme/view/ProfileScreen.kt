@@ -177,8 +177,8 @@ fun ProfileScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(top = 62.dp)
                     .background(CustomTheme.colors.background)
+                    .padding(top = 62.dp)
             ) {
                 Column(
                     modifier = Modifier

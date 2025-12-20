@@ -17,7 +17,7 @@ fun OrdersScreen() {
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = "Мои заказы",
+            text = "Мои заказы\nДанный раздел находится в разработке",
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             color = Color.Black

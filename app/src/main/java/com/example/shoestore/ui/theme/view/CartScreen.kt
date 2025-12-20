@@ -17,7 +17,7 @@ fun CartScreen() {
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = "Корзина",
+            text = "Корзина\nДанный раздел находится в разработке",
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             color = Color.Black

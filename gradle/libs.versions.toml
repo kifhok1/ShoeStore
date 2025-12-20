@@ -15,6 +15,7 @@ retrofit = "3.0.0"
 room = "2.8.3"
 navigation = "2.9.5"
 foundation = "1.10.0"
+exifinterface = "1.4.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -41,6 +42,7 @@ androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = 
 retrofit = {module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit"}
 gson = {module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit"}
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
+androidx-exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version.ref = "exifinterface" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

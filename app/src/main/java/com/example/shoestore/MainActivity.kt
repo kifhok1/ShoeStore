@@ -14,6 +14,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.compose.rememberNavController
+import com.example.shoestore.data.AuthStore
 import com.example.shoestore.data.model.PreferencesManager
 import com.example.shoestore.data.nav.NavigationScreen
 import com.example.shoestore.ui.theme.ShoeStoreTheme
@@ -23,12 +24,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
+        val authStore = AuthStore(applicationContext)
+
         val preferencesManager = PreferencesManager(this)
         val isFirstLaunch = preferencesManager.isFirstLaunch()
-
-        if (isFirstLaunch) {
-            preferencesManager.setFirstLaunchCompleted()
-        }
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
@@ -42,8 +41,9 @@ class MainActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     NavigationScreen(
                         navController = navController,
-                        modifier = Modifier.padding(),
-                        isFirstLaunch = isFirstLaunch
+                        authStore = authStore,
+                        isFirstLaunch = isFirstLaunch,
+                        preferencesManager = preferencesManager
                     )
                 }
             }

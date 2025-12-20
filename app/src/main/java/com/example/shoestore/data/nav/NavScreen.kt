@@ -4,171 +4,221 @@ import OnBoardingScreen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.shoestore.data.AuthStore
 import com.example.shoestore.data.model.OtpType
+import com.example.shoestore.data.model.PreferencesManager
 import com.example.shoestore.ui.theme.CustomTheme
-import com.example.shoestore.ui.theme.view.CreateNewPassword
-import com.example.shoestore.ui.theme.view.ForgotPassword
-import com.example.shoestore.ui.theme.view.MainAppScreen
-import com.example.shoestore.ui.theme.view.RegistrationScreen
-import com.example.shoestore.ui.theme.view.SignIn
-import com.example.shoestore.ui.theme.view.Verification
+import com.example.shoestore.ui.theme.view.*
+import com.example.shoestore.ui.theme.viewModel.CatalogViewModel
+import com.example.shoestore.ui.theme.viewModel.CatalogViewModelFactory
 
-object Route {
-    const val ONBOARDING = "onboardingscreen"
-    const val SIGN_IN = "sign_in"
-    const val REGISTER = "register"
-    const val FORGOT_PASSWORD = "forgot_password"
-    const val HOME = "home"
-    const val OTP_VERIFICATION = "otp_verification/{email}/{type}"
-    const val CREATE_NEW_PASSWORD = "create_new_password/{email}"
+sealed class Screen(val route: String) {
+    object Onboard : Screen("onboard")
+    object Register : Screen("register")
+    object SignIn : Screen("sign_in")
+    object ForgotPassword : Screen("forgot_password")
 
-    fun otp(email: String, type: String) = "otp_verification/$email/$type"
-    fun createPassword(email: String) = "create_new_password/$email"
+    object OtpVerification : Screen("otp_verification/{email}") {
+        const val EMAIL_ARG = "email"
+        fun route(email: String) = "otp_verification/$email"
+    }
+
+    object CreateNewPassword : Screen("create_new_password")
+    object Home : Screen("home")
+    object Profile : Screen("profile")
+    object Catalog : Screen("catalog?title={title}") {
+        const val TITLE_ARG = "title"
+        fun route(title: String): String = "catalog?title=${android.net.Uri.encode(title)}"
+    }
+    object Favorite : Screen("favorite")
+    object Details : Screen("details?productId={productId}") {
+        const val PRODUCT_ID_ARG = "productId"
+        fun route(productId: String): String = "details?productId=$productId"
+    }
 }
 
 @Composable
 fun NavigationScreen(
     navController: NavHostController,
-    modifier: Modifier = Modifier,
-    isFirstLaunch: Boolean = false
+    authStore: AuthStore,
+    isFirstLaunch: Boolean,
+    preferencesManager: PreferencesManager
 ) {
-    val startDestination = if (isFirstLaunch) Route.ONBOARDING else Route.SIGN_IN
+    val catalogViewModel: CatalogViewModel = viewModel(
+        factory = CatalogViewModelFactory(authStore)
+    )
+
+    // Определяем стартовый экран на основе условий:
+    // 1. Если первый запуск -> Onboarding
+    // 2. Если пользователь авторизован -> Home
+    // 3. Иначе -> SignIn
+    val startDestination = when {
+        isFirstLaunch -> Screen.Onboard.route
+        authStore.getToken() != null -> Screen.Home.route
+        else -> Screen.SignIn.route
+    }
 
     NavHost(
         navController = navController,
-        startDestination = startDestination,
-        modifier = modifier
+        startDestination = startDestination
     ) {
-
-        // --- OnBoarding ---
-        composable(Route.ONBOARDING) {
+        composable(Screen.Onboard.route) {
             OnBoardingScreen(
                 onFinished = {
-                    navController.navigate(Route.REGISTER) {
-                        popUpTo(Route.ONBOARDING) { inclusive = true }
+                    // Отмечаем, что онбординг пройден
+                    preferencesManager.setFirstLaunchCompleted()
+
+                    navController.navigate(Screen.Register.route) {
+                        popUpTo(Screen.Onboard.route) { inclusive = true }
+                        launchSingleTop = true
                     }
                 }
             )
         }
 
-        // --- Registration ---
-        composable(Route.REGISTER) {
+        composable(Screen.Register.route) {
             RegistrationScreen(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(color = CustomTheme.colors.block),
+                    .background(CustomTheme.colors.block),
+                onSignInClick = { navController.navigate(Screen.SignIn.route) },
                 onBackClick = { navController.popBackStack() },
-                onSignInClick = {
-                    navController.navigate(Route.SIGN_IN) {
-                        popUpTo(Route.SIGN_IN) { inclusive = true }
-                    }
-                },
-                // После регистрации идем на OTP с типом EMAIL
                 onRegisterSuccess = { email ->
-                    navController.navigate(Route.otp(email, "EMAIL"))
+                    navController.navigate(Screen.OtpVerification.route(email))
                 }
             )
         }
 
-        // --- Sign In ---
-        composable(Route.SIGN_IN) {
+        composable(Screen.SignIn.route) {
             SignIn(
-                onRegisterClick = { navController.navigate(Route.REGISTER) },
-                onBackClick = {
-                    if (navController.previousBackStackEntry != null) {
-                        navController.popBackStack()
+                onRegisterClick = { navController.navigate(Screen.Register.route) },
+                onForgotPasswordClick = { navController.navigate(Screen.ForgotPassword.route) },
+                onHome = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
                     }
                 },
-                onForgotPasswordClick = { navController.navigate(Route.FORGOT_PASSWORD) },
-                onHome = {
-                    navController.navigate(Route.HOME) {
-                        popUpTo(Route.SIGN_IN) { inclusive = true }
-                    }
-                }
+                onBackClick = { navController.popBackStack() }
             )
         }
 
-        // --- Forgot Password ---
-        composable(Route.FORGOT_PASSWORD) {
+        composable(Screen.ForgotPassword.route) {
             ForgotPassword(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(color = CustomTheme.colors.block),
+                    .background(CustomTheme.colors.block),
                 onBackClick = { navController.popBackStack() },
-                // После ввода почты для восстановления идем на OTP с типом RECOVERY
                 onOTPClick = { email ->
-                    navController.navigate(Route.otp(email, "RECOVERY"))
+                    navController.navigate(Screen.OtpVerification.route(email))
                 }
             )
         }
 
-        // --- OTP Verification (ГЛАВНЫЕ ИЗМЕНЕНИЯ ЗДЕСЬ) ---
         composable(
-            route = Route.OTP_VERIFICATION,
+            route = Screen.OtpVerification.route,
             arguments = listOf(
-                navArgument("email") { type = NavType.StringType },
-                navArgument("type") { type = NavType.StringType }
+                navArgument(Screen.OtpVerification.EMAIL_ARG) {
+                    type = NavType.StringType
+                }
             )
-        ) { backStackEntry ->
-            val email = backStackEntry.arguments?.getString("email") ?: ""
-            val typeStr = backStackEntry.arguments?.getString("type") ?: "EMAIL"
-
-            // Преобразуем строку в Enum
-            val otpType = if (typeStr == "RECOVERY") OtpType.RECOVERY else OtpType.EMAIL
+        ) { entry ->
+            val email = entry.arguments
+                ?.getString(Screen.OtpVerification.EMAIL_ARG)
+                .orEmpty()
 
             Verification(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(color = CustomTheme.colors.block),
+                    .background(CustomTheme.colors.block),
                 email = email,
-                otpType = otpType,
+                otpType = OtpType.EMAIL,
                 onBackClick = { navController.popBackStack() },
                 onSuccess = {
-                    // ЛОГИКА РАЗВЕТВЛЕНИЯ
-                    if (otpType == OtpType.RECOVERY) {
-                        // 1. Если восстанавливаем пароль -> Идем создавать новый пароль
-                        navController.navigate(Route.createPassword(email))
-                    } else {
-                        // 2. Если это регистрация (EMAIL) -> Идем сразу Домой
-                        // и очищаем стек, чтобы кнопка "Назад" не вернула на регистрацию
-                        navController.navigate(Route.HOME) {
-                            popUpTo(0) { inclusive = true }
-                        }
-                    }
+                    navController.navigate(Screen.CreateNewPassword.route)
                 }
             )
         }
 
-        // --- Create New Password ---
-        composable(
-            route = Route.CREATE_NEW_PASSWORD,
-            arguments = listOf(
-                navArgument("email") { type = NavType.StringType }
-            )
-        ) { backStackEntry ->
-            val email = backStackEntry.arguments?.getString("email") ?: ""
-
+        composable(Screen.CreateNewPassword.route) {
             CreateNewPassword(
-                email = email,
+                email = "user@example.com",
                 onBackClick = { navController.popBackStack() },
                 onSuccess = {
-                    // Пароль успешно изменен -> Идем домой, чистим стек
-                    navController.navigate(Route.HOME) {
-                        popUpTo(0) { inclusive = true }
+                    navController.navigate(Screen.SignIn.route) {
+                        popUpTo(Screen.Register.route) { inclusive = true }
+                        launchSingleTop = true
                     }
                 }
             )
         }
 
-        // --- Home ---
-        composable(Route.HOME) {
-            MainAppScreen()
+        composable(Screen.Home.route) {
+            MainAppScreen(
+                rootNavController = navController,
+                authStore = authStore
+            )
+        }
+
+        composable(Screen.Profile.route) {
+            ProfileScreen()
+        }
+
+        composable(
+            route = Screen.Catalog.route,
+            arguments = listOf(
+                navArgument(Screen.Catalog.TITLE_ARG) {
+                    type = NavType.StringType
+                    defaultValue = "Все"
+                }
+            )
+        ) { entry ->
+            val title = entry.arguments
+                ?.getString(Screen.Catalog.TITLE_ARG)
+                ?.let { android.net.Uri.decode(it) }
+                ?: "Все"
+
+            CatalogScreen(
+                viewModel = catalogViewModel,
+                initialCategoryTitle = title,
+                onBackClick = { navController.popBackStack() },
+                onProductClick = { card ->
+                    navController.navigate(Screen.Details.route(card.id)) {
+                        launchSingleTop = true
+                    }
+                }
+            )
+        }
+
+        composable(
+            route = Screen.Details.route,
+            arguments = listOf(
+                navArgument(Screen.Details.PRODUCT_ID_ARG) {
+                    type = NavType.StringType
+                }
+            )
+        ) { entry ->
+            val productId = entry.arguments
+                ?.getString(Screen.Details.PRODUCT_ID_ARG)
+                .orEmpty()
+
+            ProductDetailsScreen(
+                startProductId = productId,
+                viewModel = catalogViewModel,
+                onBackClick = { navController.popBackStack() }
+            )
         }
     }
 }

@@ -62,7 +62,7 @@ fun CatalogScreen(
         modifier = modifier
             .fillMaxSize()
             .background(CustomTheme.colors.background)
-            .padding(horizontal = 16.dp, vertical = 12.dp)
+            .padding(start = 16.dp, top = 62.dp, end = 16.dp)
             .statusBarsPadding()
     ) {
         // Верхняя панель

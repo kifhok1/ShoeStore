@@ -99,7 +99,7 @@ fun ProductDetailsScreen(
             .background(CustomTheme.colors.background)
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 20.dp)
+            .padding(start = 20.dp, end = 20.dp, top = 60.dp)
     ) {
         Spacer(Modifier.height(12.dp))
 

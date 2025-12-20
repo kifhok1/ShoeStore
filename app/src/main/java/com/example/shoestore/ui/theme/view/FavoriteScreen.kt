@@ -38,7 +38,6 @@ fun FavoriteScreen(
     onBackClick: () -> Unit = {},
     onProductClick: (ProductCardData) -> Unit = {}
 ) {
-    // КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: читаем favoriteProducts (не products!)
     val favoriteProductsList by viewModel.favoriteProducts.collectAsState()
     val favouriteIds by viewModel.favouriteIds.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
@@ -73,7 +72,7 @@ fun FavoriteScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .statusBarsPadding()
-                .padding(bottom = 90.dp, start = 16.dp, end = 16.dp, top = 12.dp)
+                .padding(bottom = 90.dp, start = 16.dp, end = 16.dp, top = 62.dp)
         ) {
             // Верхний бар
             Row(
@@ -103,8 +102,7 @@ fun FavoriteScreen(
                         .weight(1f)
                         .padding(end = 32.dp),
                     textAlign = TextAlign.Center,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.SemiBold
+                    style = CustomTheme.typography.SubtitleRegular16
                 )
             }
 
@@ -116,7 +114,7 @@ fun FavoriteScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator()
+                    CircularProgressIndicator(color = CustomTheme.colors.accent)
                 }
             }
             // Пустой список
@@ -127,7 +125,7 @@ fun FavoriteScreen(
                 ) {
                     Text(
                         "Избранное пусто",
-                        fontSize = 16.sp,
+                        style = CustomTheme.typography.BodyRegular16,
                         color = CustomTheme.colors.text.copy(alpha = 0.6f)
                     )
                 }

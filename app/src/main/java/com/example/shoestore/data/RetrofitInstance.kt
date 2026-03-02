@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitInstance {
     // ВАЖНО: URL должен заканчиваться слешем "/"
-    const val SUPABASE_URL = "https://gwnpjijcdwncdbgzvbxr.supabase.co/"
+    const val SUPABASE_URL = ""
 
     // Настраиваем клиент с увеличенными таймаутами
     private val client: OkHttpClient = OkHttpClient.Builder()

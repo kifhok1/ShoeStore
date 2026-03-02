@@ -13,7 +13,7 @@ import retrofit2.http.POST
 import retrofit2.http.PUT
 
 // Убедитесь, что здесь ваш актуальный Supabase Anon Key
-const val API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd3bnBqaWpjZHduY2RiZ3p2YnhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4NzYyOTYsImV4cCI6MjA4MTQ1MjI5Nn0.nkqKnReUN5rtiGEE6r9sBiMb0QOh5b6be2fU3TNIW6g"
+const val API_KEY = ""
 
 interface UserManagementService {
 
